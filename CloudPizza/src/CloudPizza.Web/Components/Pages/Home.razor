@@ -1,0 +1,164 @@
+@page "/"
+@using CloudPizza.Shared.Contracts
+@using CloudPizza.Shared.Domain
+@using CloudPizza.Web.Services
+@inject ApiClient ApiClient
+@inject ILogger<Home> Logger
+@rendermode InteractiveServer
+
+<PageTitle>Order Pizza - CloudPizza</PageTitle>
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <h1 class="mb-4">🍕 Order Your Pizza</h1>
+
+            @if (orderPlaced)
+            {
+                <div class="alert alert-success">
+                    <h4 class="alert-heading">Order Placed Successfully!</h4>
+                    <p><strong>Order ID:</strong> @lastOrderId</p>
+                    <p><strong>Customer:</strong> @lastCustomerName</p>
+                    <p><strong>Pizza:</strong> @lastPizzaType</p>
+                    <p><strong>Total:</strong> $@lastTotalPrice</p>
+                    <button class="btn btn-primary" @onclick="ResetForm">Place Another Order</button>
+                </div>
+            }
+            else
+            {
+                <div class="card">
+                    <div class="card-body">
+                        <EditForm Model="orderRequest" OnValidSubmit="HandleSubmit" FormName="orderForm">
+                            <DataAnnotationsValidator />
+                            <ValidationSummary class="text-danger" />
+
+                            <div class="mb-3">
+                                <label class="form-label">Your Name</label>
+                                <InputText @bind-Value="orderRequest.CustomerName" class="form-control" placeholder="Enter your name" />
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Select Pizza</label>
+                                <InputSelect @bind-Value="orderRequest.PizzaType" class="form-select">
+                                    <option value="">-- Choose a pizza --</option>
+                                    @foreach (var pizza in Enum.GetValues<PizzaType>())
+                                    {
+                                        <option value="@pizza.ToString()">
+                                            @pizza.GetDisplayName() - @pizza.GetDescription() ($@pizza.GetPrice())
+                                        </option>
+                                    }
+                                </InputSelect>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Quantity</label>
+                                <InputNumber @bind-Value="orderRequest.Quantity" class="form-control" min="1" max="50" />
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(orderRequest.PizzaType) && Enum.TryParse<PizzaType>(orderRequest.PizzaType, out var selectedPizza))
+                            {
+                                <div class="alert alert-info">
+                                    <strong>Estimated Total:</strong> $@(selectedPizza.GetPrice() * orderRequest.Quantity)
+                                </div>
+                            }
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-lg" disabled="@isSubmitting">
+                                    @if (isSubmitting)
+                                    {
+                                        <span class="spinner-border spinner-border-sm me-2"></span>
+                                        <span>Placing Order...</span>
+                                    }
+                                    else
+                                    {
+                                        <span>Place Order</span>
+                                    }
+                                </button>
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(errorMessage))
+                            {
+                                <div class="alert alert-danger mt-3">@errorMessage</div>
+                            }
+                        </EditForm>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <h3>Available Pizzas</h3>
+                    <div class="row">
+                        @foreach (var pizza in Enum.GetValues<PizzaType>())
+                        {
+                            <div class="col-md-6 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <h5 class="card-title">@pizza.GetDisplayName()</h5>
+                                        <p class="card-text">@pizza.GetDescription()</p>
+                                        <p class="card-text"><strong>$@pizza.GetPrice()</strong></p>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private CreateOrderRequest orderRequest = new() 
+    { 
+        CustomerName = "", 
+        PizzaType = "", 
+        Quantity = 1 
+    };
+    
+    private bool isSubmitting;
+    private bool orderPlaced;
+    private string? errorMessage;
+    private string? lastOrderId;
+    private string? lastCustomerName;
+    private string? lastPizzaType;
+    private decimal lastTotalPrice;
+
+    private async Task HandleSubmit()
+    {
+        isSubmitting = true;
+        errorMessage = null;
+
+        try
+        {
+            var response = await ApiClient.CreateOrderAsync(orderRequest);
+
+            if (response != null)
+            {
+                orderPlaced = true;
+                lastOrderId = response.OrderId;
+                lastCustomerName = response.CustomerName;
+                lastPizzaType = response.PizzaType;
+                lastTotalPrice = response.TotalPrice;
+            }
+            else
+            {
+                errorMessage = "Failed to place order. Please try again.";
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error placing order");
+            errorMessage = "An error occurred. Please try again.";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private void ResetForm()
+    {
+        orderPlaced = false;
+        orderRequest = new() { CustomerName = "", PizzaType = "", Quantity = 1 };
+        errorMessage = null;
+    }
+}

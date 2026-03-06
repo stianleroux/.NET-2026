@@ -1,0 +1,125 @@
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus,
+.btn:active:focus,
+.btn-link.nav-link:focus,
+.form-control:focus,
+.form-check-input:focus {
+  box-shadow:
+    0 0 0 0.1rem white,
+    0 0 0 0.25rem #258cfb;
+}
+
+html,
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  height: 100%;
+}
+
+.page {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+main {
+  flex: 1;
+}
+
+.sidebar {
+  background: linear-gradient(180deg, #6f42c1 0%, #563d7c 100%);
+  width: 250px;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.top-row {
+  background-color: #f7f7f7;
+  border-bottom: 1px solid #d6d5d5;
+  justify-content: flex-end;
+  height: 3.5rem;
+  display: flex;
+  align-items: center;
+  margin-left: 250px;
+}
+
+main .top-row > a {
+  margin-left: 1.5rem;
+}
+
+main {
+  margin-left: 250px;
+}
+
+.content {
+  padding-top: 1.1rem;
+}
+
+.nav-link {
+  color: rgba(255, 255, 255, 0.8);
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+  transition: all 0.2s;
+}
+
+.nav-link:hover {
+  color: white;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.nav-link.active {
+  color: white;
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+@media (max-width: 767.98px) {
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+  }
+
+  .top-row,
+  main {
+    margin-left: 0;
+  }
+}
+
+.card {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: none;
+  border-radius: 8px;
+}
+
+.badge {
+  font-weight: 600;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: #6f42c1;
+  box-shadow: 0 0 0 0.2rem rgba(111, 66, 193, 0.25);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #6f42c1 0%, #563d7c 100%);
+  border: none;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #563d7c 0%, #6f42c1 100%);
+}

@@ -1,0 +1,43 @@
+name: Build and Test
+
+on:
+    push:
+        branches: [main, develop]
+    pull_request:
+        branches: [main]
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+
+        services:
+            postgres:
+                image: postgres:17
+                env:
+                    POSTGRES_PASSWORD: postgres
+                options: >-
+                    --health-cmd pg_isready
+                    --health-interval 10s
+                    --health-timeout 5s
+                    --health-retries 5
+                ports:
+                    - 5432:5432
+
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Setup .NET
+              uses: actions/setup-dotnet@v4
+              with:
+                  dotnet-version: "10.0.x"
+
+            - name: Restore dependencies
+              run: dotnet restore CloudPizza.sln
+
+            - name: Build
+              run: dotnet build CloudPizza.sln --no-restore --configuration Release
+
+            - name: Test
+              run: dotnet test CloudPizza.sln --no-build --configuration Release --verbosity normal
+              env:
+                  ConnectionStrings__pizzadb: "Host=localhost;Database=cloudpizza;Username=postgres;Password=postgres"

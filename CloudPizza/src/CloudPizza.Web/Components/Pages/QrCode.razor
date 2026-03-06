@@ -1,0 +1,126 @@
+@page "/qrcode"
+@using CloudPizza.Web.Services
+@inject ApiClient ApiClient
+@inject ILogger<QrCode> Logger
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<PageTitle>QR Code - CloudPizza</PageTitle>
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <h1 class="mb-4">📱 QR Code Generator</h1>
+
+            <div class="alert alert-info">
+                <strong>Conference Demo:</strong> Generate a QR code for your Cloudflare Tunnel URL. 
+                Audience members can scan this to access your CloudPizza demo from their phones.
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Enter your Cloudflare Tunnel URL:</label>
+                        <input type="text" class="form-control" @bind="tunnelUrl" 
+                               placeholder="https://your-tunnel.trycloudflare.com" />
+                        <div class="form-text">
+                            Or leave blank to generate a QR code for this application's URL.
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-primary" @onclick="GenerateQrCode" disabled="@isGenerating">
+                            @if (isGenerating)
+                            {
+                                <span class="spinner-border spinner-border-sm me-2"></span>
+                                <span>Generating...</span>
+                            }
+                            else
+                            {
+                                <span>Generate QR Code</span>
+                            }
+                        </button>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger mt-3">@errorMessage</div>
+                    }
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(qrCodeDataUrl))
+            {
+                <div class="card mt-4">
+                    <div class="card-body text-center">
+                        <h3 class="card-title">Your QR Code</h3>
+                        <img src="@qrCodeDataUrl" alt="QR Code" class="img-fluid mb-3" style="max-width: 400px;" />
+                        <p class="text-muted">Scan this code to access CloudPizza</p>
+                        <p><small>@displayUrl</small></p>
+                    </div>
+                </div>
+            }
+
+            <div class="mt-4">
+                <h3>How to Use with Cloudflare Tunnel</h3>
+                <ol>
+                    <li>Install Cloudflare Tunnel: <code>npm install -g cloudflared</code></li>
+                    <li>Start tunnel: <code>cloudflared tunnel --url https://localhost:7174</code></li>
+                    <li>Copy the generated trycloudflare.com URL</li>
+                    <li>Paste it above and generate QR code</li>
+                    <li>Display QR code during your presentation</li>
+                    <li>Audience scans and orders pizza in real-time!</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string tunnelUrl = "";
+    private string? qrCodeDataUrl;
+    private string? displayUrl;
+    private string? errorMessage;
+    private bool isGenerating;
+
+    private async Task GenerateQrCode()
+    {
+        isGenerating = true;
+        errorMessage = null;
+        qrCodeDataUrl = null;
+
+        try
+        {
+            // Use provided URL or default to current app URL
+            var urlToEncode = string.IsNullOrWhiteSpace(tunnelUrl)
+                ? Navigation.BaseUri.TrimEnd('/')
+                : tunnelUrl.Trim();
+
+            // Validate URL format
+            if (!Uri.TryCreate(urlToEncode, UriKind.Absolute, out var uri))
+            {
+                errorMessage = "Please enter a valid URL (starting with http:// or https://)";
+                return;
+            }
+
+            displayUrl = urlToEncode;
+
+            // Call API to generate QR code
+            qrCodeDataUrl = await ApiClient.GetQrCodeAsync(urlToEncode);
+
+            if (string.IsNullOrEmpty(qrCodeDataUrl))
+            {
+                errorMessage = "Failed to generate QR code. Please try again.";
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error generating QR code");
+            errorMessage = "An error occurred while generating the QR code.";
+        }
+        finally
+        {
+            isGenerating = false;
+        }
+    }
+}

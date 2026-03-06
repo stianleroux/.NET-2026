@@ -1,0 +1,152 @@
+@page "/orders"
+@using CloudPizza.Shared.Contracts
+@using CloudPizza.Web.Services
+@inject ApiClient ApiClient
+@inject ILogger<Orders> Logger
+@implements IAsyncDisposable
+@rendermode InteractiveServer
+
+<PageTitle>Live Orders - CloudPizza</PageTitle>
+
+<div class="container">
+    <h1 class="mb-4">📊 Live Order Feed</h1>
+    
+    <div class="alert alert-info">
+        <strong>Real-time updates:</strong> This page uses Server-Sent Events (SSE) to stream new orders 
+        as they arrive. Orders are detected via PostgreSQL LISTEN/NOTIFY.
+        <br />
+        <span class="badge bg-success">@orders.Count orders</span>
+        <span class="badge bg-primary ms-2">@(isConnected ? "Connected" : "Disconnected")</span>
+    </div>
+
+    @if (!isConnected && !isLoading)
+    {
+        <div class="alert alert-warning">
+            <strong>Connection lost.</strong> Attempting to reconnect...
+        </div>
+    }
+
+    @if (isLoading)
+    {
+        <div class="text-center">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p>Loading orders...</p>
+        </div>
+    }
+    else if (orders.Count == 0)
+    {
+        <div class="alert alert-secondary">
+            No orders yet. Place your first order to see it appear here in real-time!
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var order in orders.OrderByDescending(o => o.CreatedAtUtc))
+            {
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card @(IsNewOrder(order) ? "border-success" : "")">
+                        <div class="card-body">
+                            @if (IsNewOrder(order))
+                            {
+                                <span class="badge bg-success mb-2">NEW!</span>
+                            }
+                            <h5 class="card-title">@order.CustomerName</h5>
+                            <p class="card-text">
+                                <strong>Pizza:</strong> @order.PizzaType<br />
+                                <strong>Quantity:</strong> @order.Quantity<br />
+                                <strong>Total:</strong> $@order.TotalPrice
+                            </p>
+                            <p class="text-muted small">
+                                @order.CreatedAtUtc.ToLocalTime().ToString("g")
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private List<OrderDto> orders = new();
+    private HashSet<string> newOrderIds = new();
+    private bool isLoading = true;
+    private bool isConnected;
+    private CancellationTokenSource? cts;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // Load existing orders first
+            var existingOrders = await ApiClient.GetOrdersAsync();
+            if (existingOrders != null)
+            {
+                orders = existingOrders;
+            }
+
+            // Start SSE stream for real-time updates
+            cts = new CancellationTokenSource();
+            _ = Task.Run(async () => await StreamOrdersAsync(cts.Token));
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task StreamOrdersAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            isConnected = true;
+            await InvokeAsync(StateHasChanged);
+
+            await foreach (var order in ApiClient.StreamOrdersAsync(cancellationToken))
+            {
+                // Add to the beginning of the list
+                if (!orders.Any(o => o.OrderId == order.OrderId))
+                {
+                    orders.Insert(0, order);
+                    newOrderIds.Add(order.OrderId);
+                    
+                    // Remove "new" badge after 5 seconds
+                    _ = Task.Delay(5000, cancellationToken).ContinueWith(_ =>
+                    {
+                        newOrderIds.Remove(order.OrderId);
+                        InvokeAsync(StateHasChanged);
+                    }, cancellationToken);
+
+                    await InvokeAsync(StateHasChanged);
+                }
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // Normal cancellation
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error streaming orders");
+            isConnected = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private bool IsNewOrder(OrderDto order)
+    {
+        return newOrderIds.Contains(order.OrderId);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (cts != null)
+        {
+            await cts.CancelAsync();
+            cts.Dispose();
+        }
+    }
+}
