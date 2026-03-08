@@ -4,7 +4,7 @@ using CloudPizza.Api.Features.Orders;
 using CloudPizza.Api.Features.QrCode;
 using CloudPizza.Api.Infrastructure;
 using CloudPizza.Infrastructure;
-using CloudPizza.Infrastructure.Notifications;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,7 +13,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.AddNpgsqlDbContext<CloudPizza.Infrastructure.Data.PizzaDbContext>("pizzadb");
 
 // Add Infrastructure services (Result pattern, SSE, QR codes, LISTEN/NOTIFY)
-builder.Services.AddInfrastructure(builder.Configuration);
+// Skip DbContext registration since it's already added by Aspire
+builder.Services.AddInfrastructure(builder.Configuration, skipDbContext: true);
 
 // .NET 10 built-in validation for Minimal APIs
 builder.Services.AddValidation();

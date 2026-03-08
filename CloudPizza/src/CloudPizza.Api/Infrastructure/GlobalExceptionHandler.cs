@@ -1,8 +1,8 @@
+namespace CloudPizza.Api.Infrastructure;
+
 using System.Diagnostics;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-
-namespace CloudPizza.Api.Infrastructure;
 
 /// <summary>
 /// Global exception handler for unhandled exceptions.

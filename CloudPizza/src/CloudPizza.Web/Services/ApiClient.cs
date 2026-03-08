@@ -1,10 +1,7 @@
-// HTTP client wrapper for API communication
-// Demonstrates: HttpClient best practices, typed responses, error handling
-using System.Net.Http.Json;
+namespace CloudPizza.Web.Services;
+
 using System.Text.Json;
 using CloudPizza.Shared.Contracts;
-
-namespace CloudPizza.Web.Services;
 
 /// <summary>
 /// Client for communicating with CloudPizza API.
@@ -12,7 +9,7 @@ namespace CloudPizza.Web.Services;
 /// </summary>
 public sealed class ApiClient(HttpClient httpClient, ILogger<ApiClient> logger)
 {
-    private readonly JsonSerializerOptions _jsonOptions = new()
+    private readonly JsonSerializerOptions jsonOptions = new()
     {
         PropertyNameCaseInsensitive = true
     };
@@ -29,15 +26,14 @@ public sealed class ApiClient(HttpClient httpClient, ILogger<ApiClient> logger)
         try
         {
             var response = await httpClient.PostAsJsonAsync("/api/orders", request, cancellationToken);
-            
+
             if (response.IsSuccessStatusCode)
             {
-                return await response.Content.ReadFromJsonAsync<CreateOrderResponse>(_jsonOptions, cancellationToken);
+                return await response.Content.ReadFromJsonAsync<CreateOrderResponse>(jsonOptions, cancellationToken);
             }
 
             var error = await response.Content.ReadAsStringAsync(cancellationToken);
-            logger.LogError("Failed to create order. Status: {Status}, Error: {Error}", 
-                response.StatusCode, error);
+            logger.LogError("Failed to create order. Status: {Status}, Error: {Error}", response.StatusCode, error);
             return null;
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
@@ -74,8 +70,8 @@ public sealed class ApiClient(HttpClient httpClient, ILogger<ApiClient> logger)
         try
         {
             return await httpClient.GetFromJsonAsync<List<OrderDto>>(
-                $"/api/orders?limit={limit}", 
-                _jsonOptions, 
+                $"/api/orders?limit={limit}",
+                jsonOptions,
                 cancellationToken);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
@@ -93,19 +89,17 @@ public sealed class ApiClient(HttpClient httpClient, ILogger<ApiClient> logger)
     /// <summary>
     /// Get QR code as Base64.
     /// </summary>
-    public async Task<string?> GetQrCodeAsync(
-        string url,
-        CancellationToken cancellationToken = default)
+    public async Task<string?> GetQrCodeAsync(string url, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
         try
         {
             var response = await httpClient.GetFromJsonAsync<QrCodeResponse>(
-                $"/api/qr/base64?url={Uri.EscapeDataString(url)}", 
-                _jsonOptions, 
+                $"/api/qr/base64?url={Uri.EscapeDataString(url)}",
+                jsonOptions,
                 cancellationToken);
-            
+
             return response?.ImageDataUrl;
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
@@ -144,7 +138,10 @@ public sealed class ApiClient(HttpClient httpClient, ILogger<ApiClient> logger)
         while (!cancellationToken.IsCancellationRequested)
         {
             var line = await reader.ReadLineAsync(cancellationToken);
-            if (line is null) break;
+            if (line is null)
+            {
+                break;
+            }
 
             // Pattern matching for SSE line parsing
             switch (line)
@@ -152,22 +149,22 @@ public sealed class ApiClient(HttpClient httpClient, ILogger<ApiClient> logger)
                 case var l when l.StartsWith("event:"):
                     eventType = l[6..].Trim();
                     break;
-                
+
                 case var l when l.StartsWith("data:"):
                     data = l[5..].Trim();
                     break;
-                
+
                 case "" or null when data is not null:
                     // End of message - empty line with data
                     if (eventType == "order-created")
                     {
-                        var evt = JsonSerializer.Deserialize<OrderCreatedEvent>(data, _jsonOptions);
+                        var evt = JsonSerializer.Deserialize<OrderCreatedEvent>(data, jsonOptions);
                         if (evt?.Order is not null)
                         {
                             yield return evt.Order;
                         }
                     }
-                    
+
                     eventType = null;
                     data = null;
                     break;

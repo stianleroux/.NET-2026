@@ -61,20 +61,28 @@ public static class OrderEndpoints
         // Parse pizza type
         if (!Enum.TryParse<PizzaType>(request.PizzaType, ignoreCase: true, out var pizzaType))
         {
-            var invalidPizzaTypeResult = Result<bool>.ValidationFailure("Invalid pizza type.");
-
             return TypedResults.ValidationProblem(new Dictionary<string, string[]>
             {
-                ["PizzaType"] =
-                [
-                    invalidPizzaTypeResult.Errors.FirstOrDefault() ??
-                    $"Invalid pizza type. Valid values: {string.Join(", ", Enum.GetNames<PizzaType>())}"
-                ]
+                ["PizzaType"] = [$"Invalid pizza type. Valid values: {string.Join(", ", Enum.GetNames<PizzaType>())}"]
             });
         }
 
-        // Create domain entity (enforces business rules)
-        var order = Order.Create(request.CustomerName, pizzaType, request.Quantity);
+        // Create domain entity (enforces business rules) using Result pattern with ValidationFailure
+        var orderResult = Order.Create(request.CustomerName, pizzaType, request.Quantity);
+
+        // Handle validation failures using pattern matching
+        if (orderResult.IsFailure)
+        {
+            // If ValidationErrors dictionary exists, use it; otherwise create one from Error message
+            var validationErrors = orderResult.ValidationErrors ?? new Dictionary<string, string[]>
+            {
+                ["Order"] = [orderResult.Error]
+            };
+
+            return TypedResults.ValidationProblem(validationErrors);
+        }
+
+        var order = orderResult.Value;
 
         // Persist to database
         dbContext.Orders.Add(order);

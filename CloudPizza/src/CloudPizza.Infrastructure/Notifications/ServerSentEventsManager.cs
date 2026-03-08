@@ -1,11 +1,9 @@
-// Server-Sent Events (SSE) manager for broadcasting to connected clients
-// Demonstrates: Channels, async streams, connection management
+namespace CloudPizza.Infrastructure.Notifications;
+
 using System.Collections.Concurrent;
 using System.Threading.Channels;
 using CloudPizza.Shared.Contracts;
 using Microsoft.Extensions.Logging;
-
-namespace CloudPizza.Infrastructure.Notifications;
 
 /// <summary>
 /// Manages Server-Sent Events connections and broadcasts order updates.
@@ -13,15 +11,13 @@ namespace CloudPizza.Infrastructure.Notifications;
 /// </summary>
 public sealed class ServerSentEventsManager(ILogger<ServerSentEventsManager> logger)
 {
-    private readonly ConcurrentDictionary<string, Channel<OrderDto>> _connections = new();
+    private readonly ConcurrentDictionary<string, Channel<OrderDto>> connections = new();
 
     /// <summary>
     /// Register a new SSE client and return a stream of order updates.
     /// Each client gets their own channel for isolated message delivery.
     /// </summary>
-    public async IAsyncEnumerable<OrderDto> RegisterClientAsync(
-        string clientId,
-        [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public async IAsyncEnumerable<OrderDto> RegisterClientAsync(string clientId, [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var channel = Channel.CreateUnbounded<OrderDto>(new UnboundedChannelOptions
         {
@@ -29,14 +25,13 @@ public sealed class ServerSentEventsManager(ILogger<ServerSentEventsManager> log
             SingleWriter = false
         });
 
-        if (!_connections.TryAdd(clientId, channel))
+        if (!connections.TryAdd(clientId, channel))
         {
             logger.LogWarning("Client {ClientId} already registered", clientId);
             yield break;
         }
 
-        logger.LogInformation("Client {ClientId} connected. Total connections: {Count}",
-            clientId, _connections.Count);
+        logger.LogInformation("Client {ClientId} connected. Total connections: {Count}", clientId, connections.Count);
 
         try
         {
@@ -57,16 +52,15 @@ public sealed class ServerSentEventsManager(ILogger<ServerSentEventsManager> log
     /// </summary>
     public async ValueTask BroadcastOrderAsync(OrderDto order, CancellationToken cancellationToken = default)
     {
-        if (_connections.IsEmpty)
+        if (connections.IsEmpty)
         {
             logger.LogDebug("No connected clients to broadcast to");
             return;
         }
 
-        logger.LogInformation("Broadcasting order {OrderId} to {Count} clients",
-            order.OrderId, _connections.Count);
+        logger.LogInformation("Broadcasting order {OrderId} to {Count} clients", order.OrderId, connections.Count);
 
-        var tasks = _connections.Values.Select(async channel =>
+        var tasks = connections.Values.Select(async channel =>
         {
             try
             {
@@ -86,16 +80,18 @@ public sealed class ServerSentEventsManager(ILogger<ServerSentEventsManager> log
     /// </summary>
     private void UnregisterClient(string clientId)
     {
-        if (_connections.TryRemove(clientId, out var channel))
+        if (connections.TryRemove(clientId, out var channel))
         {
             channel.Writer.Complete();
-            logger.LogInformation("Client {ClientId} disconnected. Remaining connections: {Count}",
-                clientId, _connections.Count);
+            logger.LogInformation("Client {ClientId} disconnected. Remaining connections: {Count}", clientId, connections.Count);
         }
     }
 
     /// <summary>
     /// Get the current number of connected clients.
     /// </summary>
-    public int GetConnectionCount() => _connections.Count;
+    public int GetConnectionCount()
+    {
+        return connections.Count;
+    }
 }

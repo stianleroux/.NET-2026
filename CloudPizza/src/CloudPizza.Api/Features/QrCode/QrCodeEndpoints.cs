@@ -1,9 +1,7 @@
-// QR Code endpoints for generating scannable codes
-// Demonstrates: Minimal APIs, service injection, binary responses
+namespace CloudPizza.Api.Features.QrCode;
+
 using CloudPizza.Infrastructure.Services;
 using Microsoft.AspNetCore.Http.HttpResults;
-
-namespace CloudPizza.Api.Features.QrCode;
 
 /// <summary>
 /// Extension methods to register QR code endpoints.
@@ -36,18 +34,15 @@ public static class QrCodeEndpoints
 
     /// <summary>
     /// Generate QR code as PNG image.
-    /// Demonstrates: Binary file responses, validation.
+    /// Demonstrates: Binary file responses, Result pattern, pattern matching, structured validation
     /// </summary>
-    private static Results<FileContentHttpResult, ValidationProblem> GenerateQrCodeAsync(
-        string? url,
-        QrCodeService qrCodeService,
-        int pixelsPerModule = 20)
+    private static Results<FileContentHttpResult, ValidationProblem> GenerateQrCodeAsync(string? url, QrCodeService qrCodeService, int pixelsPerModule = 20)
     {
         if (string.IsNullOrWhiteSpace(url))
         {
             return TypedResults.ValidationProblem(new Dictionary<string, string[]>
             {
-                ["url"] = new[] { "URL is required" }
+                ["url"] = ["URL is required"]
             });
         }
 
@@ -55,24 +50,28 @@ public static class QrCodeEndpoints
         {
             return TypedResults.ValidationProblem(new Dictionary<string, string[]>
             {
-                ["url"] = new[] { "Invalid URL format" }
+                ["url"] = ["Invalid URL format"]
             });
         }
 
-        if (pixelsPerModule < 1 || pixelsPerModule > 50)
+        // Use Result pattern from service
+        var qrCodeResult = QrCodeService.GenerateQrCode(url, pixelsPerModule);
+
+        // Handle result using pattern matching - map ValidationErrors if present
+        return qrCodeResult switch
         {
-            return TypedResults.ValidationProblem(new Dictionary<string, string[]>
+            { IsSuccess: true } => TypedResults.File(qrCodeResult.Value, contentType: "image/png", fileDownloadName: "qrcode.png"),
+            { ValidationErrors: not null } => TypedResults.ValidationProblem(qrCodeResult.ValidationErrors),
+            _ => TypedResults.ValidationProblem(new Dictionary<string, string[]>
             {
-                ["pixelsPerModule"] = new[] { "Pixels per module must be between 1 and 50" }
-            });
-        }
-
-        var qrCodeBytes = qrCodeService.GenerateQrCode(url, pixelsPerModule);
-        return TypedResults.File(qrCodeBytes, contentType: "image/png", fileDownloadName: "qrcode.png");
+                ["qrCode"] = [qrCodeResult.Error]
+            })
+        };
     }
 
     /// <summary>
     /// Generate QR code as Base64 string for HTML embedding.
+    /// Demonstrates: Result pattern, functional composition, structured validation
     /// </summary>
     private static Results<Ok<QrCodeResponse>, ValidationProblem> GenerateQrCodeBase64Async(
         string? url,
@@ -83,7 +82,7 @@ public static class QrCodeEndpoints
         {
             return TypedResults.ValidationProblem(new Dictionary<string, string[]>
             {
-                ["url"] = new[] { "URL is required" }
+                ["url"] = ["URL is required"]
             });
         }
 
@@ -91,26 +90,27 @@ public static class QrCodeEndpoints
         {
             return TypedResults.ValidationProblem(new Dictionary<string, string[]>
             {
-                ["url"] = new[] { "Invalid URL format" }
+                ["url"] = ["Invalid URL format"]
             });
         }
 
-        var base64 = qrCodeService.GenerateQrCodeBase64(url, pixelsPerModule);
-        return TypedResults.Ok(new QrCodeResponse
-        {
-            Url = url,
-            Base64Image = base64,
-            ImageDataUrl = $"data:image/png;base64,{base64}"
-        });
-    }
-}
+        // Use Result pattern from service
+        var base64Result = QrCodeService.GenerateQrCodeBase64(url, pixelsPerModule);
 
-/// <summary>
-/// Response DTO for Base64 QR code.
-/// </summary>
-public sealed record QrCodeResponse
-{
-    public required string Url { get; init; }
-    public required string Base64Image { get; init; }
-    public required string ImageDataUrl { get; init; }
+        // Handle result using pattern matching - map ValidationErrors if present
+        return base64Result switch
+        {
+            { IsSuccess: true } => TypedResults.Ok(new QrCodeResponse
+            {
+                Url = url,
+                Base64Image = base64Result.Value,
+                ImageDataUrl = $"data:image/png;base64,{base64Result.Value}"
+            }),
+            { ValidationErrors: not null } => TypedResults.ValidationProblem(base64Result.ValidationErrors),
+            _ => TypedResults.ValidationProblem(new Dictionary<string, string[]>
+            {
+                ["qrCode"] = [base64Result.Error]
+            })
+        };
+    }
 }

@@ -1,11 +1,10 @@
+namespace CloudPizza.Infrastructure.Migrations;
+
+using CloudPizza.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
-using CloudPizza.Infrastructure.Data;
 
 #nullable disable
-
-namespace CloudPizza.Infrastructure.Migrations;
 
 [DbContext(typeof(PizzaDbContext))]
 partial class PizzaDbContextModelSnapshot : ModelSnapshot

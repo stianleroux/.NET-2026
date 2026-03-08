@@ -1,6 +1,6 @@
 // Result pattern implementation to avoid exception-driven flow
 // Demonstrates: Generic types, discriminated unions pattern, fluent API
-namespace CloudPizza.Infrastructure.Common;
+namespace CloudPizza.Shared.Common;
 
 /// <summary>
 /// Result pattern for explicit error handling without exceptions.
@@ -44,12 +44,20 @@ public sealed class Result<T>
     }
 
     // Factory methods for creating results
-    public static Result<T> Success(T value) => new(value);
-    
-    public static Result<T> Failure(string error) => new(error);
-    
-    public static Result<T> ValidationFailure(string error, Dictionary<string, string[]> validationErrors) =>
-        new(error, validationErrors);
+    public static Result<T> Success(T value)
+    {
+        return new(value);
+    }
+
+    public static Result<T> Failure(string error)
+    {
+        return new(error);
+    }
+
+    public static Result<T> ValidationFailure(string error, Dictionary<string, string[]> validationErrors)
+    {
+        return new(error, validationErrors);
+    }
 
     // Functional programming helpers
     public Result<TNew> Map<TNew>(Func<T, TNew> mapper)
@@ -80,15 +88,21 @@ public sealed class Result<T>
             : Result<TNew>.Failure(Error);
     }
 
-    public T GetValueOrDefault(T defaultValue) =>
-        IsSuccess ? Value : defaultValue;
+    public T GetValueOrDefault(T defaultValue)
+    {
+        return IsSuccess ? Value : defaultValue;
+    }
 
     public void Match(Action<T> onSuccess, Action<string> onFailure)
     {
         if (IsSuccess)
+        {
             onSuccess(Value);
+        }
         else
+        {
             onFailure(Error);
+        }
     }
 }
 
@@ -113,9 +127,15 @@ public sealed class Result
         _error = error;
     }
 
-    public static Result Success() => new(true);
-    
-    public static Result Failure(string error) => new(false, error);
+    public static Result Success()
+    {
+        return new(true);
+    }
+
+    public static Result Failure(string error)
+    {
+        return new(false, error);
+    }
 
     public Result<T> Map<T>(Func<T> mapper)
     {

@@ -1,10 +1,11 @@
-// Database initialization with trigger setup
+namespace CloudPizza.Infrastructure.Data;
+
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-
-namespace CloudPizza.Infrastructure.Data;
 
 /// <summary>
 /// Background service to initialize database schema and PostgreSQL triggers.

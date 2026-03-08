@@ -12,13 +12,13 @@ var postgres = builder.AddPostgres("postgres")
 var pizzaDb = postgres.AddDatabase("pizzadb");
 
 // API service with health checks and OpenTelemetry
-var api = builder.AddProject<Projects.CloudPizza_Api>("api")
+var api = builder.AddProject("api", "../CloudPizza.Api/CloudPizza.Api.csproj")
     .WithReference(pizzaDb)
     .WithEnvironment("ASPNETCORE_FORWARDEDHEADERS_ENABLED", "true") // For Cloudflare Tunnel
     .WaitFor(pizzaDb); // Ensure database is ready before starting API
 
 // Blazor frontend with real-time SSE connection to API
-var web = builder.AddProject<Projects.CloudPizza_Web>("web")
+var web = builder.AddProject("web", "../CloudPizza.Web/CloudPizza.Web.csproj")
     .WithReference(api)
     .WaitFor(api);
 

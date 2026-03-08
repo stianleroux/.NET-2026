@@ -1,9 +1,7 @@
-// EF Core DbContext for PostgreSQL with modern configuration
-// Demonstrates: Primary constructor DI, file-scoped namespace, strong typing
+namespace CloudPizza.Infrastructure.Data;
+
 using CloudPizza.Shared.Domain;
 using Microsoft.EntityFrameworkCore;
-
-namespace CloudPizza.Infrastructure.Data;
 
 /// <summary>
 /// Database context for CloudPizza application.
@@ -21,7 +19,7 @@ public sealed class PizzaDbContext(DbContextOptions<PizzaDbContext> options) : D
         modelBuilder.Entity<Order>(entity =>
         {
             entity.ToTable("orders");
-            
+
             // Configure strongly-typed ID
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Id)
@@ -62,35 +60,35 @@ public sealed class PizzaDbContext(DbContextOptions<PizzaDbContext> options) : D
 
         // Add the PostgreSQL NOTIFY trigger function and trigger
         modelBuilder.HasPostgresExtension("uuid-ossp");
-        
+
         // Create function that sends notification when order is inserted
         var createTriggerFunction = @"
-CREATE OR REPLACE FUNCTION notify_order_created()
-RETURNS TRIGGER AS $$
-DECLARE
-    payload json;
-BEGIN
-    payload = json_build_object(
-        'Id', NEW.id::text,
-        'CustomerName', NEW.customer_name,
-        'PizzaType', NEW.pizza_type,
-        'Quantity', NEW.quantity,
-        'TotalPrice', NEW.total_price,
-        'CreatedAtUtc', NEW.created_at_utc
-    );
+        CREATE OR REPLACE FUNCTION notify_order_created()
+        RETURNS TRIGGER AS $$
+        DECLARE
+            payload json;
+        BEGIN
+            payload = json_build_object(
+                'Id', NEW.id::text,
+                'CustomerName', NEW.customer_name,
+                'PizzaType', NEW.pizza_type,
+                'Quantity', NEW.quantity,
+                'TotalPrice', NEW.total_price,
+                'CreatedAtUtc', NEW.created_at_utc
+            );
     
-    PERFORM pg_notify('orders_channel', payload::text);
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;";
+            PERFORM pg_notify('orders_channel', payload::text);
+            RETURN NEW;
+        END;
+        $$ LANGUAGE plpgsql;";
 
         // Create trigger that calls the function
         var createTrigger = @"
-DROP TRIGGER IF EXISTS order_created_trigger ON orders;
-CREATE TRIGGER order_created_trigger
-AFTER INSERT ON orders
-FOR EACH ROW
-EXECUTE FUNCTION notify_order_created();";
+        DROP TRIGGER IF EXISTS order_created_trigger ON orders;
+        CREATE TRIGGER order_created_trigger
+        AFTER INSERT ON orders
+        FOR EACH ROW
+        EXECUTE FUNCTION notify_order_created();";
 
         modelBuilder.HasPostgresExtension("uuid-ossp");
     }

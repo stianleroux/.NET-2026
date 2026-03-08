@@ -5,9 +5,6 @@ using CloudPizza.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add Aspire service defaults
-builder.AddServiceDefaults();
-
 // Add Blazor components with InteractiveServer render mode
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
@@ -20,9 +17,6 @@ builder.Services.AddHttpClient<ApiClient>(client =>
 });
 
 var app = builder.Build();
-
-// Map Aspire defaults
-app.MapDefaultEndpoints();
 
 // Configure the HTTP request pipeline
 if (!app.Environment.IsDevelopment())

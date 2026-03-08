@@ -1,11 +1,10 @@
-using Microsoft.EntityFrameworkCore;
+namespace CloudPizza.Infrastructure.Migrations;
+
+using CloudPizza.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
-using CloudPizza.Infrastructure.Data;
 
 #nullable disable
-
-namespace CloudPizza.Infrastructure.Migrations;
 
 [DbContext(typeof(PizzaDbContext))]
 [Migration("20260305000001_InitialCreate")]

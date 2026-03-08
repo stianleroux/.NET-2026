@@ -1,5 +1,5 @@
-// Extension methods for Infrastructure layer DI registration
-// Demonstrates: Extension methods, service registration patterns
+namespace CloudPizza.Infrastructure;
+
 using CloudPizza.Infrastructure.Data;
 using CloudPizza.Infrastructure.Notifications;
 using CloudPizza.Infrastructure.Services;
@@ -7,8 +7,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-
-namespace CloudPizza.Infrastructure;
 
 /// <summary>
 /// Extension methods for registering Infrastructure services.
@@ -21,30 +19,34 @@ public static class DependencyInjection
     /// </summary>
     public static IServiceCollection AddInfrastructure(
         this IServiceCollection services,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        bool skipDbContext = false)
     {
-        // Add EF Core with PostgreSQL
-        services.AddDbContext<PizzaDbContext>((serviceProvider, options) =>
+        // Add EF Core with PostgreSQL (skip if already registered by Aspire)
+        if (!skipDbContext)
         {
-            var connectionString = configuration.GetConnectionString("pizzadb")
-                ?? throw new InvalidOperationException("Database connection string 'pizzadb' not found");
-
-            options.UseNpgsql(connectionString, npgsqlOptions =>
+            services.AddDbContext<PizzaDbContext>((serviceProvider, options) =>
             {
-                npgsqlOptions.EnableRetryOnFailure(
-                    maxRetryCount: 5,
-                    maxRetryDelay: TimeSpan.FromSeconds(10),
-                    errorCodesToAdd: null);
+                var connectionString = configuration.GetConnectionString("pizzadb")
+                    ?? throw new InvalidOperationException("Database connection string 'pizzadb' not found");
+
+                options.UseNpgsql(connectionString, npgsqlOptions =>
+                {
+                    npgsqlOptions.EnableRetryOnFailure(
+                        maxRetryCount: 5,
+                        maxRetryDelay: TimeSpan.FromSeconds(10),
+                        errorCodesToAdd: null);
+                });
+
+                // Enable sensitive data logging in development
+                var environment = serviceProvider.GetService<IHostEnvironment>();
+                if (environment?.IsDevelopment() == true)
+                {
+                    options.EnableSensitiveDataLogging();
+                    options.EnableDetailedErrors();
+                }
             });
-
-            // Enable sensitive data logging in development
-            var environment = serviceProvider.GetService<IHostEnvironment>();
-            if (environment?.IsDevelopment() == true)
-            {
-                options.EnableSensitiveDataLogging();
-                options.EnableDetailedErrors();
-            }
-        });
+        }
 
         // Add background services
         services.AddHostedService<DatabaseInitializer>();

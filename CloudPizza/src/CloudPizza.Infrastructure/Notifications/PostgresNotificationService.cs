@@ -1,5 +1,5 @@
-// PostgreSQL LISTEN/NOTIFY service for real-time change detection
-// Demonstrates: IHostedService, async streams, channel-based communication
+namespace CloudPizza.Infrastructure.Notifications;
+
 using System.Text.Json;
 using System.Threading.Channels;
 using CloudPizza.Shared.Contracts;
@@ -8,19 +8,15 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Npgsql;
 
-namespace CloudPizza.Infrastructure.Notifications;
-
 /// <summary>
 /// Background service that listens to PostgreSQL NOTIFY events
 /// and broadcasts them to connected clients via channels.
 /// Uses PostgreSQL's LISTEN/NOTIFY for efficient change detection.
 /// </summary>
-public sealed class PostgresNotificationService(
-    IConfiguration configuration,
-    ILogger<PostgresNotificationService> logger) : BackgroundService
+public sealed partial class PostgresNotificationService(IConfiguration configuration, ILogger<PostgresNotificationService> logger) : BackgroundService
 {
     private const string ChannelName = "orders_channel";
-    private readonly Channel<OrderDto> _channel = Channel.CreateUnbounded<OrderDto>(new UnboundedChannelOptions
+    private readonly Channel<OrderDto> channel = Channel.CreateUnbounded<OrderDto>(new UnboundedChannelOptions
     {
         SingleReader = false,
         SingleWriter = true
@@ -32,7 +28,7 @@ public sealed class PostgresNotificationService(
     /// </summary>
     public async IAsyncEnumerable<OrderDto> SubscribeAsync([System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        await foreach (var order in _channel.Reader.ReadAllAsync(cancellationToken))
+        await foreach (var order in channel.Reader.ReadAllAsync(cancellationToken))
         {
             yield return order;
         }
@@ -46,7 +42,7 @@ public sealed class PostgresNotificationService(
             ?? throw new InvalidOperationException("Database connection string 'pizzadb' not found");
 
         await using var connection = new NpgsqlConnection(connectionString);
-        
+
         try
         {
             await connection.OpenAsync(stoppingToken);
@@ -57,12 +53,11 @@ public sealed class PostgresNotificationService(
             {
                 try
                 {
-                    logger.LogDebug("Received notification from channel '{Channel}': {Payload}", 
-                        args.Channel, args.Payload);
+                    logger.LogDebug("Received notification from channel '{Channel}': {Payload}", args.Channel, args.Payload);
 
                     // Parse the JSON payload from PostgreSQL trigger
                     var orderData = JsonSerializer.Deserialize<OrderNotificationPayload>(args.Payload);
-                    
+
                     if (orderData is not null)
                     {
                         var orderDto = new OrderDto
@@ -75,7 +70,7 @@ public sealed class PostgresNotificationService(
                             CreatedAtUtc = orderData.CreatedAtUtc
                         };
 
-                        await _channel.Writer.WriteAsync(orderDto, stoppingToken);
+                        await channel.Writer.WriteAsync(orderDto, stoppingToken);
                         logger.LogInformation("Order {OrderId} notification broadcasted", orderData.Id);
                     }
                 }
@@ -108,19 +103,8 @@ public sealed class PostgresNotificationService(
         }
         finally
         {
-            _channel.Writer.Complete();
+            channel.Writer.Complete();
             logger.LogInformation("PostgreSQL LISTEN service stopped");
         }
-    }
-
-    // Internal model for deserializing PostgreSQL JSON payload
-    private sealed record OrderNotificationPayload
-    {
-        public required string Id { get; init; }
-        public required string CustomerName { get; init; }
-        public required string PizzaType { get; init; }
-        public required int Quantity { get; init; }
-        public required decimal TotalPrice { get; init; }
-        public required DateTime CreatedAtUtc { get; init; }
     }
 }
