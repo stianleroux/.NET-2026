@@ -1,9 +1,9 @@
-namespace CloudBurger.Infrastructure.Migrations;
 
 using CloudBurger.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 
+namespace CloudBurger.Infrastructure.Migrations;
 #nullable disable
 
 [DbContext(typeof(BurgerDbContext))]

@@ -1,4 +1,5 @@
 @page "/"
+@using System.ComponentModel.DataAnnotations
 @using CloudBurger.Shared.Contracts
 @using CloudBurger.Shared.Domain
 @using CloudBurger.Web.Services
@@ -28,18 +29,18 @@
             {
                 <div class="card">
                     <div class="card-body">
-                        <EditForm Model="orderRequest" OnValidSubmit="HandleSubmit" FormName="orderForm">
+                        <EditForm Model="formModel" OnValidSubmit="HandleSubmit" FormName="orderForm">
                             <DataAnnotationsValidator />
                             <ValidationSummary class="text-danger" />
 
                             <div class="mb-3">
                                 <label class="form-label">Your Name</label>
-                                <InputText @bind-Value="customerName" class="form-control" placeholder="Enter your name" />
+                                <InputText @bind-Value="formModel.CustomerName" class="form-control" placeholder="Enter your name" />
                             </div>
 
                             <div class="mb-3">
                                 <label class="form-label">Select Burger</label>
-                                <InputSelect @bind-Value="burgerType" class="form-select">
+                                <InputSelect @bind-Value="formModel.BurgerType" class="form-select">
                                     <option value="">-- Choose a burger --</option>
                                     @foreach (var burger in Enum.GetValues<BurgerType>())
                                     {
@@ -52,13 +53,13 @@
 
                             <div class="mb-3">
                                 <label class="form-label">Quantity</label>
-                                <InputNumber @bind-Value="quantity" class="form-control" min="1" max="50" />
+                                <InputNumber @bind-Value="formModel.Quantity" class="form-control" min="1" max="50" />
                             </div>
 
-                            @if (!string.IsNullOrEmpty(burgerType) && Enum.TryParse<BurgerType>(burgerType, out var selectedBurger))
+                            @if (!string.IsNullOrEmpty(formModel.BurgerType) && Enum.TryParse<BurgerType>(formModel.BurgerType, out var selectedBurger))
                             {
                                 <div class="alert alert-info">
-                                    <strong>Estimated Total:</strong> $@(selectedBurger.GetPrice() * quantity)
+                                    <strong>Estimated Total:</strong> $@(selectedBurger.GetPrice() * formModel.Quantity)
                                 </div>
                             }
 
@@ -107,16 +108,7 @@
 </div>
 
 @code {
-    private CreateOrderRequest orderRequest = new()
-    {
-        CustomerName = "",
-        BurgerType = "",
-        Quantity = 1
-    };
-
-    private string customerName = "";
-    private string burgerType = "";
-    private int quantity = 1;
+    private CreateOrderFormModel formModel = new();
 
     private bool isSubmitting;
     private bool orderPlaced;
@@ -133,11 +125,11 @@
 
         try
         {
-            orderRequest = new()
+            var orderRequest = new CreateOrderRequest
             {
-                CustomerName = customerName,
-                BurgerType = burgerType,
-                Quantity = quantity
+                CustomerName = formModel.CustomerName,
+                BurgerType = formModel.BurgerType,
+                Quantity = formModel.Quantity
             };
 
             var response = await ApiClient.CreateOrderAsync(orderRequest);
@@ -169,9 +161,21 @@
     private void ResetForm()
     {
         orderPlaced = false;
-        customerName = "";
-        burgerType = "";
-        quantity = 1;
+        formModel = new();
         errorMessage = null;
+    }
+
+    private sealed class CreateOrderFormModel
+    {
+        [Required]
+        [MinLength(2)]
+        [MaxLength(100)]
+        public string CustomerName { get; set; } = string.Empty;
+
+        [Required]
+        public string BurgerType { get; set; } = string.Empty;
+
+        [Range(1, 50)]
+        public int Quantity { get; set; } = 1;
     }
 }

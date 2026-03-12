@@ -1,10 +1,10 @@
 // Strongly-typed ID for Orders - prevents primitive obsession
 // Demonstrates: Records, required members, value object pattern, FluentValidation
-namespace CloudBurger.Shared.Domain;
 
 using CloudBurger.Shared.Common;
 using FluentValidation;
 
+namespace CloudBurger.Shared.Domain;
 /// <summary>
 /// Strongly-typed Order identifier to prevent mixing with other GUIDs.
 /// Uses record for value-based equality and immutability.
@@ -60,18 +60,15 @@ public readonly record struct OrderId
     /// </summary>
     public static Result<OrderId> Parse(string value)
     {
-        if (!Guid.TryParse(value, out var guid))
-        {
-            return Result<OrderId>.ValidationFailure(
+        return !Guid.TryParse(value, out var guid)
+            ? Result<OrderId>.ValidationFailure(
                 "Invalid OrderId format",
                 new Dictionary<string, string[]>
                 {
                     ["Value"] = ["The value must be a valid GUID format"]
                 }
-            );
-        }
-
-        return Create(guid);
+            )
+            : Create(guid);
     }
 
     /// <summary>

@@ -1,4 +1,3 @@
-namespace CloudBurger.Infrastructure;
 
 using CloudBurger.Infrastructure.Data;
 using CloudBurger.Infrastructure.Notifications;
@@ -8,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
+namespace CloudBurger.Infrastructure;
 /// <summary>
 /// Extension methods for registering Infrastructure services.
 /// Keeps service registration organized and follows separation of concerns.

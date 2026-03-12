@@ -1,7 +1,7 @@
-namespace CloudBurger.Shared.Domain;
 
 using NetEscapades.EnumGenerators;
 
+namespace CloudBurger.Shared.Domain;
 /// <summary>
 /// Available burger types in the system.
 /// Using enum for type safety and clear domain vocabulary.

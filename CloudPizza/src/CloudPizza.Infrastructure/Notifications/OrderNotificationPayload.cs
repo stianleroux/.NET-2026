@@ -1,4 +1,5 @@
 namespace CloudBurger.Infrastructure.Notifications;
+
 public sealed partial class PostgresNotificationService
 {
     // Internal model for deserializing PostgreSQL JSON payload

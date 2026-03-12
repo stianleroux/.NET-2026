@@ -4,7 +4,6 @@ using CloudBurger.Api.Features.Orders;
 using CloudBurger.Api.Features.QrCode;
 using CloudBurger.Api.Infrastructure;
 using CloudBurger.Infrastructure;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -75,7 +74,7 @@ app.UseCors();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    
+
     // Use Scalar instead of Swagger - modern, fast, beautiful
     app.MapScalarApiReference(options =>
     {

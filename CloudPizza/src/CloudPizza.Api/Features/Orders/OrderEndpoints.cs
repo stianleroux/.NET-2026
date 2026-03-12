@@ -7,7 +7,6 @@ using CloudBurger.Shared.Contracts;
 using CloudBurger.Shared.Domain;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
-using Results.Models;
 
 namespace CloudBurger.Api.Features.Orders;
 
@@ -88,15 +87,7 @@ public static class OrderEndpoints
         dbContext.Orders.Add(order);
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        var response = new CreateOrderResponse
-        {
-            OrderId = order.Id.ToString(),
-            CustomerName = order.CustomerName,
-            BurgerType = order.BurgerType.GetDisplayName(),
-            Quantity = order.Quantity,
-            TotalPrice = order.TotalPrice,
-            CreatedAtUtc = order.CreatedAtUtc
-        };
+        var response = OrderMapper.ToCreateResponse(order);
 
         return TypedResults.Created($"/api/orders/{order.Id}", response);
     }
@@ -113,18 +104,11 @@ public static class OrderEndpoints
         var orders = await dbContext.Orders
             .OrderByDescending(o => o.CreatedAtUtc)
             .Take(Math.Min(limit, 100)) // Cap at 100
-            .Select(o => new OrderDto
-            {
-                OrderId = o.Id.ToString(),
-                CustomerName = o.CustomerName,
-                BurgerType = o.BurgerType.ToString(),
-                Quantity = o.Quantity,
-                TotalPrice = o.TotalPrice,
-                CreatedAtUtc = o.CreatedAtUtc
-            })
             .ToListAsync(cancellationToken);
 
-        return TypedResults.Ok(orders);
+        var dtos = orders.Select(OrderMapper.ToDto).ToList();
+
+        return TypedResults.Ok(dtos);
     }
 
     /// <summary>
@@ -156,7 +140,7 @@ public static class OrderEndpoints
                 });
 
                 var sseMessage = $"event: order-created\ndata: {json}\nid: {DateTime.UtcNow.Ticks}\n\n";
-                
+
                 await response.WriteAsync(sseMessage, context.RequestAborted);
                 await response.Body.FlushAsync(context.RequestAborted);
             }

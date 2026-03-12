@@ -1,13 +1,13 @@
-namespace CloudBurger.Infrastructure.Notifications;
-
 using System.Text.Json;
 using System.Threading.Channels;
 using CloudBurger.Shared.Contracts;
+using CloudBurger.Shared.Domain;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Npgsql;
 
+namespace CloudBurger.Infrastructure.Notifications;
 /// <summary>
 /// Background service that listens to PostgreSQL NOTIFY events
 /// and broadcasts them to connected clients via channels.
@@ -60,13 +60,19 @@ public sealed partial class PostgresNotificationService(IConfiguration configura
 
                     if (orderData is not null)
                     {
+                        // Derive UnitPrice from the BurgerType extension GetPrice()
+                        // so the live price table in BurgerTypeData.Info is always used.
+                        Enum.TryParse<BurgerType>(orderData.BurgerType, ignoreCase: true, out var burgerType);
+                        var unitPrice = burgerType.GetPrice();
+
                         var orderDto = new OrderDto
                         {
                             OrderId = orderData.Id,
                             CustomerName = orderData.CustomerName,
-                            BurgerType = orderData.BurgerType,
+                            BurgerType = burgerType.GetDisplayName(),
                             Quantity = orderData.Quantity,
-                            TotalPrice = orderData.TotalPrice,
+                            UnitPrice = unitPrice,
+                            TotalPrice = unitPrice * orderData.Quantity,
                             CreatedAtUtc = orderData.CreatedAtUtc
                         };
 

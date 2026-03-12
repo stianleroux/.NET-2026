@@ -1,8 +1,8 @@
-namespace CloudBurger.Web.Services;
 
 using System.Text.Json;
 using CloudBurger.Shared.Contracts;
 
+namespace CloudBurger.Web.Services;
 /// <summary>
 /// Client for communicating with CloudBurger API.
 /// Uses primary constructor and HttpClient DI.

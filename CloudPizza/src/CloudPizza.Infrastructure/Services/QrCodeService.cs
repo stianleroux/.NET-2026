@@ -1,8 +1,8 @@
-namespace CloudBurger.Infrastructure.Services;
 
 using CloudBurger.Shared.Common;
 using QRCoder;
 
+namespace CloudBurger.Infrastructure.Services;
 /// <summary>
 /// Service for generating QR codes.
 /// Used to create scannable codes for the public Cloudflare tunnel URL.

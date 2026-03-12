@@ -1,9 +1,9 @@
-namespace CloudBurger.Api.Infrastructure;
 
 using System.Diagnostics;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
+namespace CloudBurger.Api.Infrastructure;
 /// <summary>
 /// Global exception handler for unhandled exceptions.
 /// Keeps business flow exception-free while handling unexpected failures centrally.

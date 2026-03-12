@@ -22,6 +22,8 @@ builder.Services.AddHttpClient<ApiClient>(client =>
         : new Uri(configuredApiBaseUrl);
 });
 
+    builder.Services.AddSingleton<CloudflareTunnelService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline

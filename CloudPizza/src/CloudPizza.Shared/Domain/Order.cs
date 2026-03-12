@@ -1,7 +1,7 @@
-namespace CloudBurger.Shared.Domain;
 
 using CloudBurger.Shared.Common;
 
+namespace CloudBurger.Shared.Domain;
 /// <summary>
 /// Order aggregate root with business logic and validation.
 /// Demonstrates DDD principles with rich behavior, not anemic data bags.

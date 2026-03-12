@@ -1,10 +1,10 @@
-namespace CloudBurger.Infrastructure.Notifications;
 
 using System.Collections.Concurrent;
 using System.Threading.Channels;
 using CloudBurger.Shared.Contracts;
 using Microsoft.Extensions.Logging;
 
+namespace CloudBurger.Infrastructure.Notifications;
 /// <summary>
 /// Manages Server-Sent Events connections and broadcasts order updates.
 /// Uses channels for efficient async message distribution.

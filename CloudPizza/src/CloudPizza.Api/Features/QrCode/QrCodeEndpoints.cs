@@ -1,8 +1,8 @@
-namespace CloudBurger.Api.Features.QrCode;
 
 using CloudBurger.Infrastructure.Services;
 using Microsoft.AspNetCore.Http.HttpResults;
 
+namespace CloudBurger.Api.Features.QrCode;
 /// <summary>
 /// Extension methods to register QR code endpoints.
 /// </summary>

@@ -31,6 +31,7 @@ public sealed record CreateOrderResponse
     public required string CustomerName { get; init; }
     public required string BurgerType { get; init; }
     public required int Quantity { get; init; }
+    public required decimal UnitPrice { get; init; }
     public required decimal TotalPrice { get; init; }
     public required DateTime CreatedAtUtc { get; init; }
 }
@@ -44,6 +45,7 @@ public sealed record OrderDto
     public required string CustomerName { get; init; }
     public required string BurgerType { get; init; }
     public required int Quantity { get; init; }
+    public required decimal UnitPrice { get; init; }
     public required decimal TotalPrice { get; init; }
     public required DateTime CreatedAtUtc { get; init; }
 }

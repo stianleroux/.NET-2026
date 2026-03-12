@@ -1,8 +1,8 @@
-namespace CloudBurger.Infrastructure.Data;
 
 using CloudBurger.Shared.Domain;
 using Microsoft.EntityFrameworkCore;
 
+namespace CloudBurger.Infrastructure.Data;
 /// <summary>
 /// Database context for CloudBurger application.
 /// Uses primary constructor for DI (new in .NET 10).
@@ -60,35 +60,6 @@ public sealed class BurgerDbContext(DbContextOptions<BurgerDbContext> options) :
 
         // Add the PostgreSQL NOTIFY trigger function and trigger
         modelBuilder.HasPostgresExtension("uuid-ossp");
-
-        // Create function that sends notification when order is inserted
-        var createTriggerFunction = @"
-        CREATE OR REPLACE FUNCTION notify_order_created()
-        RETURNS TRIGGER AS $$
-        DECLARE
-            payload json;
-        BEGIN
-            payload = json_build_object(
-                'Id', NEW.id::text,
-                'CustomerName', NEW.customer_name,
-                'BurgerType', NEW.burger_type,
-                'Quantity', NEW.quantity,
-                'TotalPrice', NEW.total_price,
-                'CreatedAtUtc', NEW.created_at_utc
-            );
-    
-            PERFORM pg_notify('orders_channel', payload::text);
-            RETURN NEW;
-        END;
-        $$ LANGUAGE plpgsql;";
-
-        // Create trigger that calls the function
-        var createTrigger = @"
-        DROP TRIGGER IF EXISTS order_created_trigger ON orders;
-        CREATE TRIGGER order_created_trigger
-        AFTER INSERT ON orders
-        FOR EACH ROW
-        EXECUTE FUNCTION notify_order_created();";
 
         modelBuilder.HasPostgresExtension("uuid-ossp");
     }

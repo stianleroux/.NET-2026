@@ -1,6 +1,7 @@
 @page "/qrcode"
 @using CloudBurger.Web.Services
 @inject ApiClient ApiClient
+@inject CloudflareTunnelService TunnelService
 @inject ILogger<QrCode> Logger
 @inject NavigationManager Navigation
 
@@ -28,6 +29,18 @@
                     </div>
 
                     <div class="d-grid gap-2">
+                        <button class="btn btn-outline-secondary" @onclick="CreateTunnelAsync" disabled="@(isGenerating || isCreatingTunnel)">
+                            @if (isCreatingTunnel)
+                            {
+                                <span class="spinner-border spinner-border-sm me-2"></span>
+                                <span>Creating Tunnel...</span>
+                            }
+                            else
+                            {
+                                <span>Create Cloudflare Tunnel Automatically</span>
+                            }
+                        </button>
+
                         <button class="btn btn-primary" @onclick="GenerateQrCode" disabled="@isGenerating">
                             @if (isGenerating)
                             {
@@ -52,7 +65,7 @@
             {
                 <div class="card mt-4">
                     <div class="card-body text-center">
-                        <h3 class="card-title">Your QR Code</h3>
+                        <h3 class="card-title">Your QR Code<small><br/>Warren approved this 😂</small></h3>
                         <img src="@qrCodeDataUrl" alt="QR Code" class="img-fluid mb-3" style="max-width: 400px;" />
                         <p class="text-muted">Scan this code to access CloudBurger</p>
                         <p><small>@displayUrl</small></p>
@@ -63,10 +76,10 @@
             <div class="mt-4">
                 <h3>How to Use with Cloudflare Tunnel</h3>
                 <ol>
-                    <li>Install Cloudflare Tunnel: <code>npm install -g cloudflared</code></li>
-                    <li>Start tunnel: <code>cloudflared tunnel --url https://localhost:7174</code></li>
-                    <li>Copy the generated trycloudflare.com URL</li>
-                    <li>Paste it above and generate QR code</li>
+                    <li>Click <strong>Create Cloudflare Tunnel Automatically</strong> above</li>
+                    <li>Or run manually: <code>cloudflared tunnel --url https://localhost:7174 --no-tls-verify</code></li>
+                    <li>Use the generated <code>trycloudflare.com</code> URL</li>
+                    <li>Generate the QR code</li>
                     <li>Display QR code during your presentation</li>
                     <li>Audience scans and orders burger in real-time!</li>
                 </ol>
@@ -81,6 +94,28 @@
     private string? displayUrl;
     private string? errorMessage;
     private bool isGenerating;
+    private bool isCreatingTunnel;
+
+    private async Task CreateTunnelAsync()
+    {
+        isCreatingTunnel = true;
+        errorMessage = null;
+
+        try
+        {
+            var appUrl = Navigation.BaseUri.TrimEnd('/');
+            tunnelUrl = await TunnelService.StartOrGetTunnelAsync(appUrl);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error creating Cloudflare tunnel");
+            errorMessage = ex.Message;
+        }
+        finally
+        {
+            isCreatingTunnel = false;
+        }
+    }
 
     private async Task GenerateQrCode()
     {

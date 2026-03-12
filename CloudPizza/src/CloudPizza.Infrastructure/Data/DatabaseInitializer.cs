@@ -1,12 +1,10 @@
-namespace CloudBurger.Infrastructure.Data;
 
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
+namespace CloudBurger.Infrastructure.Data;
 /// <summary>
 /// Background service to initialize database schema and PostgreSQL triggers.
 /// Runs at startup using IHostedService pattern.
