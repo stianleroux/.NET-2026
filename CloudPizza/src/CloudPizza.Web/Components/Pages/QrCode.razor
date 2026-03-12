@@ -1,10 +1,10 @@
 @page "/qrcode"
-@using CloudPizza.Web.Services
+@using CloudBurger.Web.Services
 @inject ApiClient ApiClient
 @inject ILogger<QrCode> Logger
 @inject NavigationManager Navigation
 
-<PageTitle>QR Code - CloudPizza</PageTitle>
+<PageTitle>QR Code - CloudBurger</PageTitle>
 
 <div class="container">
     <div class="row">
@@ -13,7 +13,7 @@
 
             <div class="alert alert-info">
                 <strong>Conference Demo:</strong> Generate a QR code for your Cloudflare Tunnel URL. 
-                Audience members can scan this to access your CloudPizza demo from their phones.
+                Audience members can scan this to access your CloudBurger demo from their phones.
             </div>
 
             <div class="card">
@@ -54,7 +54,7 @@
                     <div class="card-body text-center">
                         <h3 class="card-title">Your QR Code</h3>
                         <img src="@qrCodeDataUrl" alt="QR Code" class="img-fluid mb-3" style="max-width: 400px;" />
-                        <p class="text-muted">Scan this code to access CloudPizza</p>
+                        <p class="text-muted">Scan this code to access CloudBurger</p>
                         <p><small>@displayUrl</small></p>
                     </div>
                 </div>
@@ -68,7 +68,7 @@
                     <li>Copy the generated trycloudflare.com URL</li>
                     <li>Paste it above and generate QR code</li>
                     <li>Display QR code during your presentation</li>
-                    <li>Audience scans and orders pizza in real-time!</li>
+                    <li>Audience scans and orders burger in real-time!</li>
                 </ol>
             </div>
         </div>

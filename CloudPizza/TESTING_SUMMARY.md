@@ -1,13 +1,13 @@
-# CloudPizza Test Suite & Mocking Patterns - Summary
+# CloudBurger Test Suite & Mocking Patterns - Summary
 
 ## ✅ Completed Deliverables
 
 ### 1. **Test Structure Created** (~200+ Tests)
-- [x] `CloudPizza.Tests.Domain.OrderTests` - 60 domain model tests
-- [x] `CloudPizza.Tests.Features.OrderEndpointsTests` - 70 API endpoint tests  
-- [x] `CloudPizza.Tests.Services.ServiceTests` - 50 service/mocking tests
-- [x] `CloudPizza.Tests.Integration.OrderIntegrationTests` - 30 integration tests
-- [x] `CloudPizza.Tests.Benchmarks.MockingPerformanceBenchmarks` - 20+ benchmark tests
+- [x] `CloudBurger.Tests.Domain.OrderTests` - 60 domain model tests
+- [x] `CloudBurger.Tests.Features.OrderEndpointsTests` - 70 API endpoint tests  
+- [x] `CloudBurger.Tests.Services.ServiceTests` - 50 service/mocking tests
+- [x] `CloudBurger.Tests.Integration.OrderIntegrationTests` - 30 integration tests
+- [x] `CloudBurger.Tests.Benchmarks.MockingPerformanceBenchmarks` - 20+ benchmark tests
 
 ### 2. **Test Infrastructure**
 - [x] TUnit test framework integration
@@ -22,7 +22,7 @@
   - Step-by-step conversion guide
   - When to use which approach
   - Common gotchas and solutions
-  - CloudPizza-specific examples
+  - CloudBurger-specific examples
   - Reference links and next steps
 
 ### 4. **C# 14 Features Documentation**
@@ -39,7 +39,7 @@
   - Feature matrix and priority levels
 
 ### 5. **Test README**
-- [x] `src/CloudPizza.Tests/README.md` - Complete testing guide with:
+- [x] `src/CloudBurger.Tests/README.md` - Complete testing guide with:
   - Test organization overview
   - How to run tests
   - Test highlights and examples
@@ -94,7 +94,7 @@ dotnet script docs/ConvertToImposter.csx
 **Outputs:**
 - Conversion patterns (7 types)
 - Step-by-step guide (6 steps)
-- Practical CloudPizza example
+- Practical CloudBurger example
 - When to use what
 - Common gotchas (5 categories)
 - Next steps and metrics
@@ -152,10 +152,10 @@ From the benchmark tests:
 
 ```bash
 # Build test project
-dotnet build src/CloudPizza.Tests/CloudPizza.Tests.csproj
+dotnet build src/CloudBurger.Tests/CloudBurger.Tests.csproj
 
 # Run all tests
-dotnet test src/CloudPizza.Tests/CloudPizza.Tests.csproj
+dotnet test src/CloudBurger.Tests/CloudBurger.Tests.csproj
 
 # Run specific test class
 dotnet test --filter "ClassName=OrderTests"
@@ -242,10 +242,10 @@ Test Pyramid:
 ## 🏆 Project Structure
 
 ```
-CloudPizza/
+CloudBurger/
 ├── src/
-│   ├── CloudPizza.Tests/
-│   │   ├── CloudPizza.Tests.csproj (TUnit + NSubstitute)
+│   ├── CloudBurger.Tests/
+│   │   ├── CloudBurger.Tests.csproj (TUnit + NSubstitute)
 │   │   ├── Domain/
 │   │   │   └── OrderTests.cs (60 tests)
 │   │   ├── Features/

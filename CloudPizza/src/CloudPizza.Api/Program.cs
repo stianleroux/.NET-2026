@@ -1,16 +1,16 @@
 // Modern .NET 10 Minimal API with clean architecture
 // Demonstrates: Minimal APIs, route groups, typed results, OpenAPI 3.1, Scalar
-using CloudPizza.Api.Features.Orders;
-using CloudPizza.Api.Features.QrCode;
-using CloudPizza.Api.Infrastructure;
-using CloudPizza.Infrastructure;
+using CloudBurger.Api.Features.Orders;
+using CloudBurger.Api.Features.QrCode;
+using CloudBurger.Api.Infrastructure;
+using CloudBurger.Infrastructure;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add database with Aspire Npgsql integration
-builder.AddNpgsqlDbContext<CloudPizza.Infrastructure.Data.PizzaDbContext>("pizzadb");
+builder.AddNpgsqlDbContext<CloudBurger.Infrastructure.Data.BurgerDbContext>("burgerdb");
 
 // Add Infrastructure services (Result pattern, SSE, QR codes, LISTEN/NOTIFY)
 // Skip DbContext registration since it's already added by Aspire
@@ -26,10 +26,10 @@ builder.Services.AddOpenApi(options =>
     {
         document.Info = new()
         {
-            Title = "CloudPizza API",
+            Title = "CloudBurger API",
             Version = "v1",
             Description = """
-                Modern pizza ordering API showcasing .NET 10 capabilities:
+                Modern burger ordering API showcasing .NET 10 capabilities:
                 - Minimal APIs with route groups
                 - Server-Sent Events for real-time updates
                 - PostgreSQL LISTEN/NOTIFY for change detection
@@ -39,8 +39,8 @@ builder.Services.AddOpenApi(options =>
                 """,
             Contact = new()
             {
-                Name = "CloudPizza Team",
-                Url = new Uri("https://github.com/yourorg/cloudpizza")
+                Name = "CloudBurger Team",
+                Url = new Uri("https://github.com/yourorg/cloudburger")
             }
         };
         return Task.CompletedTask;
@@ -80,7 +80,7 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference(options =>
     {
         options
-            .WithTitle("CloudPizza API")
+            .WithTitle("CloudBurger API")
             .WithTheme(ScalarTheme.Purple)
             .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient)
             .WithPreferredScheme("https");
@@ -98,12 +98,12 @@ api.MapQrCodeEndpoints();
 // Root endpoint
 app.MapGet("/", () => TypedResults.Ok(new
 {
-    Service = "CloudPizza API",
+    Service = "CloudBurger API",
     Version = "1.0",
     Documentation = "/scalar/v1",
     Features = new[]
     {
-        "Pizza Ordering",
+        "Burger Ordering",
         "Real-time SSE Updates",
         "PostgreSQL LISTEN/NOTIFY",
         "QR Code Generation"

@@ -1,10 +1,10 @@
-# 🍕 CloudPizza - Modern .NET 10 Pizza Ordering Demo
+# 🍕 CloudBurger - Modern .NET 10 Burger Ordering Demo
 
 A production-quality demonstration application showcasing the latest .NET 10 capabilities, designed for conference talks and technical presentations.
 
 ## 🎯 Purpose
 
-This application demonstrates modern .NET architecture and features through a real-world pizza ordering system with:
+This application demonstrates modern .NET architecture and features through a real-world burger ordering system with:
 - Real-time order updates
 - PostgreSQL change detection
 - Cloud-ready architecture
@@ -13,7 +13,7 @@ This application demonstrates modern .NET architecture and features through a re
 ## ✨ Features
 
 ### Core Functionality
-- **Pizza Ordering System** - Place orders through a beautiful Blazor UI
+- **Burger Ordering System** - Place orders through a beautiful Blazor UI
 - **Real-time Updates** - See orders appear instantly via Server-Sent Events (SSE)
 - **PostgreSQL LISTEN/NOTIFY** - Database-level change detection for instant notifications
 - **QR Code Generation** - Create scannable codes for Cloudflare Tunnel URLs
@@ -83,31 +83,31 @@ This application demonstrates modern .NET architecture and features through a re
 ### Project Structure
 
 ```
-CloudPizza/
+CloudBurger/
 ├── src/
-│   ├── CloudPizza.AppHost/          # Aspire orchestration
-│   ├── CloudPizza.Api/              # Minimal API backend
+│   ├── CloudBurger.AppHost/          # Aspire orchestration
+│   ├── CloudBurger.Api/              # Minimal API backend
 │   │   ├── Features/
 │   │   │   ├── Orders/              # Order endpoints (SSE)
 │   │   │   └── QrCode/              # QR code generation
 │   │   └── Program.cs               # API setup & routing
-│   ├── CloudPizza.Web/              # Blazor InteractiveServer
+│   ├── CloudBurger.Web/              # Blazor InteractiveServer
 │   │   ├── Components/
 │   │   │   ├── Pages/               # Blazor pages
 │   │   │   └── Layout/              # Layout components
 │   │   └── Services/                # API client
-│   ├── CloudPizza.Shared/           # Contracts & Domain
+│   ├── CloudBurger.Shared/           # Contracts & Domain
 │   │   ├── Domain/                  # Rich domain models
 │   │   │   ├── Order.cs             # Aggregate root
 │   │   │   ├── OrderId.cs           # Strongly-typed ID
-│   │   │   └── PizzaType.cs         # Domain enum
+│   │   │   └── BurgerType.cs         # Domain enum
 │   │   └── Contracts/               # DTOs
-│   └── CloudPizza.Infrastructure/   # Data & Services
+│   └── CloudBurger.Infrastructure/   # Data & Services
 │       ├── Data/                    # EF Core DbContext
 │       ├── Notifications/           # LISTEN/NOTIFY + SSE
 │       ├── Services/                # QR code, etc.
 │       └── Common/                  # Result pattern
-└── CloudPizza.sln
+└── CloudBurger.sln
 ```
 
 ## 🚀 Getting Started
@@ -122,13 +122,13 @@ CloudPizza/
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourorg/cloudpizza.git
-   cd cloudpizza
+   git clone https://github.com/yourorg/cloudburger.git
+   cd cloudburger
    ```
 
 2. **Run with Aspire** (simplest option)
    ```bash
-   cd CloudPizza
+   cd CloudBurger
    dotnet run --project src/CloudPizza.AppHost
    ```
 
@@ -141,7 +141,7 @@ CloudPizza/
 
 3. **Access the applications**
    - **Aspire Dashboard**: https://localhost:17000
-   - **CloudPizza Web**: Check Aspire dashboard for URL
+   - **CloudBurger Web**: Check Aspire dashboard for URL
    - **API Documentation (Scalar)**: Check API URL + `/scalar/v1`
 
 ### Manual Setup (Alternative)
@@ -150,14 +150,14 @@ If you prefer to run services individually:
 
 1. **Start PostgreSQL**
    ```bash
-   docker run --name cloudpizza-postgres -e POSTGRES_PASSWORD=postgres -p 5432:5432 -d postgres:17
+   docker run --name cloudburger-postgres -e POSTGRES_PASSWORD=postgres -p 5432:5432 -d postgres:17
    ```
 
 2. **Update connection string** in `src/CloudPizza.Api/appsettings.Development.json`:
    ```json
    {
      "ConnectionStrings": {
-       "pizzadb": "Host=localhost;Database=cloudpizza;Username=postgres;Password=postgres"
+       "burgerdb": "Host=localhost;Database=cloudburger;Username=postgres;Password=postgres"
      }
    }
    ```
@@ -193,13 +193,13 @@ If you prefer to run services individually:
 3. **Copy the generated URL** (e.g., `https://your-app.trycloudflare.com`)
 
 4. **Generate QR Code**
-   - Navigate to the QR Code page in CloudPizza
+   - Navigate to the QR Code page in CloudBurger
    - Paste your Cloudflare URL
    - Display the generated QR code on screen
 
 5. **Audience Interaction**
    - Audience scans QR code
-   - They place pizza orders
+   - They place burger orders
    - Orders appear in real-time on your Live Orders screen
    - Demonstrate SSE and PostgreSQL NOTIFY in action!
 

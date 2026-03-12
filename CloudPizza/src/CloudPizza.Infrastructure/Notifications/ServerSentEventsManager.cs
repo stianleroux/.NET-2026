@@ -1,8 +1,8 @@
-namespace CloudPizza.Infrastructure.Notifications;
+namespace CloudBurger.Infrastructure.Notifications;
 
 using System.Collections.Concurrent;
 using System.Threading.Channels;
-using CloudPizza.Shared.Contracts;
+using CloudBurger.Shared.Contracts;
 using Microsoft.Extensions.Logging;
 
 /// <summary>

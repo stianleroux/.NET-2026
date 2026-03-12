@@ -1,4 +1,4 @@
-namespace CloudPizza.Infrastructure.Data;
+namespace CloudBurger.Infrastructure.Data;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -20,7 +20,7 @@ public sealed class DatabaseInitializer(
         logger.LogInformation("Initializing database...");
 
         using var scope = serviceProvider.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<PizzaDbContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<BurgerDbContext>();
 
         try
         {
@@ -39,7 +39,7 @@ public sealed class DatabaseInitializer(
         }
     }
 
-    private static async Task CreateNotificationTrigger(PizzaDbContext dbContext, CancellationToken cancellationToken)
+    private static async Task CreateNotificationTrigger(BurgerDbContext dbContext, CancellationToken cancellationToken)
     {
         // Create the function
         var createFunction = @"
@@ -51,7 +51,7 @@ BEGIN
     payload = json_build_object(
         'Id', NEW.id::text,
         'CustomerName', NEW.customer_name,
-        'PizzaType', NEW.pizza_type,
+        'BurgerType', NEW.burger_type,
         'Quantity', NEW.quantity,
         'TotalPrice', NEW.total_price,
         'CreatedAtUtc', NEW.created_at_utc

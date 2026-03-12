@@ -15,7 +15,7 @@
 
 ## 🎯 Overview
 
-CloudPizza uses a **multi-layered validation strategy** that eliminates exception-driven control flow for business logic while leveraging .NET 10's built-in validation features where appropriate.
+CloudBurger uses a **multi-layered validation strategy** that eliminates exception-driven control flow for business logic while leveraging .NET 10's built-in validation features where appropriate.
 
 ### Key Principles
 
@@ -69,7 +69,7 @@ public sealed class Result<T>
 
 **❌ Before (Exception-Driven):**
 ```csharp
-public static Order Create(string name, PizzaType pizza, int qty)
+public static Order Create(string name, BurgerType burger, int qty)
 {
     if (string.IsNullOrEmpty(name))
         throw new ArgumentException("Name required");
@@ -83,7 +83,7 @@ public static Order Create(string name, PizzaType pizza, int qty)
 // Usage
 try
 {
-    var order = Order.Create(customerName, pizza, quantity);
+    var order = Order.Create(customerName, burger, quantity);
     // Success path
 }
 catch (ArgumentException ex)
@@ -94,7 +94,7 @@ catch (ArgumentException ex)
 
 **✅ After (Result Pattern):**
 ```csharp
-public static Result<Order> Create(string name, PizzaType pizza, int qty)
+public static Result<Order> Create(string name, BurgerType burger, int qty)
 {
     var nameValidation = name switch
     {
@@ -113,7 +113,7 @@ public static Result<Order> Create(string name, PizzaType pizza, int qty)
 }
 
 // Usage
-var orderResult = Order.Create(customerName, pizza, quantity);
+var orderResult = Order.Create(customerName, burger, quantity);
 
 if (orderResult.IsFailure)
 {
@@ -144,7 +144,7 @@ C# 14 pattern matching provides elegant, declarative validation logic.
 ```csharp
 // Location: src/CloudPizza.Shared/Domain/Order.cs
 
-public static Result<Order> Create(string customerName, PizzaType pizzaType, int quantity)
+public static Result<Order> Create(string customerName, BurgerType burgerType, int quantity)
 {
     // Validate customer name using pattern matching
     var nameValidation = customerName switch
@@ -188,7 +188,7 @@ public static Result<Order> Create(string customerName, PizzaType pizzaType, int
             "Quantity validation failed",
             new Dictionary<string, string[]> 
             { 
-                ["Quantity"] = ["Cannot order more than 50 pizzas at once"] 
+                ["Quantity"] = ["Cannot order more than 50 burgers at once"] 
             }),
         _ => Result<int>.Success(quantity)
     };
@@ -203,10 +203,10 @@ public static Result<Order> Create(string customerName, PizzaType pizzaType, int
     {
         Id = OrderId.New(),
         CustomerName = nameValidation.Value,
-        PizzaType = pizzaType,
+        BurgerType = burgerType,
         Quantity = quantity,
         CreatedAtUtc = DateTime.UtcNow,
-        TotalPrice = pizzaType.GetPrice() * quantity
+        TotalPrice = burgerType.GetPrice() * quantity
     });
 }
 ```
@@ -238,10 +238,10 @@ quantity switch
 }
 
 // Boolean patterns
-Enum.IsDefined(pizzaType) switch
+Enum.IsDefined(burgerType) switch
 {
     false => Failure("Invalid enum value"),
-    true => Success(pizzaType)
+    true => Success(burgerType)
 }
 ```
 
@@ -257,7 +257,7 @@ Use FluentValidation for complex validation logic in value objects and domain pr
 // Location: src/CloudPizza.Shared/Domain/OrderId.cs
 
 using FluentValidation;
-using CloudPizza.Shared.Common;
+using CloudBurger.Shared.Common;
 
 public readonly record struct OrderId
 {
@@ -348,7 +348,7 @@ public sealed record CreateOrderRequest
     public required string CustomerName { get; init; }
 
     [Required]
-    public required string PizzaType { get; init; }
+    public required string BurgerType { get; init; }
 
     [Range(1, 50)]
     public required int Quantity { get; init; }
@@ -364,7 +364,7 @@ public sealed record CreateOrderRequest
 private static async Task<Results<Created<CreateOrderResponse>, ValidationProblem>> 
     CreateOrderAsync(
         CreateOrderRequest request,  // ← Automatically validated
-        PizzaDbContext dbContext,
+        BurgerDbContext dbContext,
         CancellationToken cancellationToken)
 {
     // If validation fails, .NET returns 400 Bad Request automatically
@@ -374,7 +374,7 @@ private static async Task<Results<Created<CreateOrderResponse>, ValidationProble
     // Now apply domain validation using Result pattern
     var orderResult = Order.Create(
         request.CustomerName, 
-        pizzaType, 
+        burgerType, 
         request.Quantity);
 
     if (orderResult.IsFailure)
@@ -407,23 +407,23 @@ private static async Task<Results<Created<CreateOrderResponse>, ValidationProble
 private static async Task<Results<Created<CreateOrderResponse>, ValidationProblem, ProblemHttpResult>> 
     CreateOrderAsync(
         CreateOrderRequest request,
-        PizzaDbContext dbContext,
+        BurgerDbContext dbContext,
         CancellationToken cancellationToken)
 {
     // Step 1: Data Annotations validation (automatic)
     // If request fails Data Annotations, .NET returns 400 automatically
 
-    // Step 2: Parse pizza type
-    if (!Enum.TryParse<PizzaType>(request.PizzaType, ignoreCase: true, out var pizzaType))
+    // Step 2: Parse burger type
+    if (!Enum.TryParse<BurgerType>(request.BurgerType, ignoreCase: true, out var burgerType))
     {
         return TypedResults.ValidationProblem(new Dictionary<string, string[]>
         {
-            ["PizzaType"] = [$"Invalid pizza type. Valid values: {string.Join(", ", Enum.GetNames<PizzaType>())}"]
+            ["BurgerType"] = [$"Invalid burger type. Valid values: {string.Join(", ", Enum.GetNames<BurgerType>())}"]
         });
     }
 
     // Step 3: Domain validation using Result pattern
-    var orderResult = Order.Create(request.CustomerName, pizzaType, request.Quantity);
+    var orderResult = Order.Create(request.CustomerName, burgerType, request.Quantity);
 
     // Step 4: Handle validation failures
     if (orderResult.IsFailure)
@@ -446,7 +446,7 @@ private static async Task<Results<Created<CreateOrderResponse>, ValidationProble
     {
         OrderId = order.Id.ToString(),
         CustomerName = order.CustomerName,
-        PizzaType = order.PizzaType.GetDisplayName(),
+        BurgerType = order.BurgerType.GetDisplayName(),
         Quantity = order.Quantity,
         TotalPrice = order.TotalPrice,
         CreatedAtUtc = order.CreatedAtUtc
@@ -681,7 +681,7 @@ public static Result<Order> Create(string name, int qty)
 
 ## 🎯 Summary
 
-CloudPizza uses a **layered validation strategy**:
+CloudBurger uses a **layered validation strategy**:
 
 1. **API Layer** → Data Annotations (automatic validation)
 2. **Domain Value Objects** → FluentValidation + Result pattern
@@ -698,5 +698,5 @@ This approach provides:
 ---
 
 **Last Updated:** March 2026  
-**Author:** CloudPizza Development Team  
+**Author:** CloudBurger Development Team  
 **Version:** 1.0

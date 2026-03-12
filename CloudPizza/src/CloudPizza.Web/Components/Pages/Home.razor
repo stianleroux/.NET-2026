@@ -1,17 +1,17 @@
 @page "/"
-@using CloudPizza.Shared.Contracts
-@using CloudPizza.Shared.Domain
-@using CloudPizza.Web.Services
+@using CloudBurger.Shared.Contracts
+@using CloudBurger.Shared.Domain
+@using CloudBurger.Web.Services
 @using Microsoft.AspNetCore.Components.Forms
 @inject ApiClient ApiClient
 @inject ILogger<Home> Logger
 
-<PageTitle>Order Pizza - CloudPizza</PageTitle>
+<PageTitle>Order Burger - CloudBurger</PageTitle>
 
 <div class="container">
     <div class="row">
         <div class="col-lg-8 mx-auto">
-            <h1 class="mb-4">🍕 Order Your Pizza</h1>
+            <h1 class="mb-4">🍕 Order Your Burger</h1>
 
             @if (orderPlaced)
             {
@@ -19,7 +19,7 @@
                     <h4 class="alert-heading">Order Placed Successfully!</h4>
                     <p><strong>Order ID:</strong> @lastOrderId</p>
                     <p><strong>Customer:</strong> @lastCustomerName</p>
-                    <p><strong>Pizza:</strong> @lastPizzaType</p>
+                    <p><strong>Burger:</strong> @lastBurgerType</p>
                     <p><strong>Total:</strong> $@lastTotalPrice</p>
                     <button class="btn btn-primary" @onclick="ResetForm">Place Another Order</button>
                 </div>
@@ -38,13 +38,13 @@
                             </div>
 
                             <div class="mb-3">
-                                <label class="form-label">Select Pizza</label>
-                                <InputSelect @bind-Value="pizzaType" class="form-select">
-                                    <option value="">-- Choose a pizza --</option>
-                                    @foreach (var pizza in Enum.GetValues<PizzaType>())
+                                <label class="form-label">Select Burger</label>
+                                <InputSelect @bind-Value="burgerType" class="form-select">
+                                    <option value="">-- Choose a burger --</option>
+                                    @foreach (var burger in Enum.GetValues<BurgerType>())
                                     {
-                                        <option value="@pizza.ToString()">
-                                            @pizza.GetDisplayName() - @pizza.GetDescription() ($@pizza.GetPrice())
+                                        <option value="@burger.ToString()">
+                                            @burger.GetDisplayName() - @burger.GetDescription() ($@burger.GetPrice())
                                         </option>
                                     }
                                 </InputSelect>
@@ -55,10 +55,10 @@
                                 <InputNumber @bind-Value="quantity" class="form-control" min="1" max="50" />
                             </div>
 
-                            @if (!string.IsNullOrEmpty(pizzaType) && Enum.TryParse<PizzaType>(pizzaType, out var selectedPizza))
+                            @if (!string.IsNullOrEmpty(burgerType) && Enum.TryParse<BurgerType>(burgerType, out var selectedBurger))
                             {
                                 <div class="alert alert-info">
-                                    <strong>Estimated Total:</strong> $@(selectedPizza.GetPrice() * quantity)
+                                    <strong>Estimated Total:</strong> $@(selectedBurger.GetPrice() * quantity)
                                 </div>
                             }
 
@@ -85,16 +85,16 @@
                 </div>
 
                 <div class="mt-4">
-                    <h3>Available Pizzas</h3>
+                    <h3>Available Burgers</h3>
                     <div class="row">
-                        @foreach (var pizza in Enum.GetValues<PizzaType>())
+                        @foreach (var burger in Enum.GetValues<BurgerType>())
                         {
                             <div class="col-md-6 mb-3">
                                 <div class="card h-100">
                                     <div class="card-body">
-                                        <h5 class="card-title">@pizza.GetDisplayName()</h5>
-                                        <p class="card-text">@pizza.GetDescription()</p>
-                                        <p class="card-text"><strong>$@pizza.GetPrice()</strong></p>
+                                        <h5 class="card-title">@burger.GetDisplayName()</h5>
+                                        <p class="card-text">@burger.GetDescription()</p>
+                                        <p class="card-text"><strong>$@burger.GetPrice()</strong></p>
                                     </div>
                                 </div>
                             </div>
@@ -110,12 +110,12 @@
     private CreateOrderRequest orderRequest = new()
     {
         CustomerName = "",
-        PizzaType = "",
+        BurgerType = "",
         Quantity = 1
     };
 
     private string customerName = "";
-    private string pizzaType = "";
+    private string burgerType = "";
     private int quantity = 1;
 
     private bool isSubmitting;
@@ -123,7 +123,7 @@
     private string? errorMessage;
     private string? lastOrderId;
     private string? lastCustomerName;
-    private string? lastPizzaType;
+    private string? lastBurgerType;
     private decimal lastTotalPrice;
 
     private async Task HandleSubmit()
@@ -136,7 +136,7 @@
             orderRequest = new()
             {
                 CustomerName = customerName,
-                PizzaType = pizzaType,
+                BurgerType = burgerType,
                 Quantity = quantity
             };
 
@@ -147,7 +147,7 @@
                 orderPlaced = true;
                 lastOrderId = response.OrderId;
                 lastCustomerName = response.CustomerName;
-                lastPizzaType = response.PizzaType;
+                lastBurgerType = response.BurgerType;
                 lastTotalPrice = response.TotalPrice;
             }
             else
@@ -170,7 +170,7 @@
     {
         orderPlaced = false;
         customerName = "";
-        pizzaType = "";
+        burgerType = "";
         quantity = 1;
         errorMessage = null;
     }

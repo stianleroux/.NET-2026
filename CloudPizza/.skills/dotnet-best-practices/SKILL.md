@@ -152,7 +152,7 @@ public sealed class OrderService(IOrderRepository repository, ILogger<OrderServi
 **Good:**
 ```csharp
 // Domain - no dependencies
-namespace CloudPizza.Domain;
+namespace CloudBurger.Domain;
 
 public sealed class Order
 {
@@ -161,9 +161,9 @@ public sealed class Order
 }
 
 // Infrastructure - depends on Domain
-namespace CloudPizza.Infrastructure;
+namespace CloudBurger.Infrastructure;
 
-public sealed class OrderRepository(PizzaDbContext context)
+public sealed class OrderRepository(BurgerDbContext context)
 {
     public async Task SaveAsync(Order order, CancellationToken ct)
     {
@@ -200,7 +200,7 @@ public sealed class OrderService(
 public sealed record CreateOrderRequest
 {
     public required string CustomerName { get; init; }
-    public required string PizzaType { get; init; }
+    public required string BurgerType { get; init; }
     public required int Quantity { get; init; }
 }
 ```
@@ -210,12 +210,12 @@ public sealed record CreateOrderRequest
 
 ```csharp
 // Good
-namespace CloudPizza.Domain;
+namespace CloudBurger.Domain;
 
 public sealed class Order { ... }
 
 // Bad
-namespace CloudPizza.Domain
+namespace CloudBurger.Domain
 {
     public sealed class Order { ... }
 }
@@ -276,12 +276,12 @@ public sealed class Result<T>
     public static Result<T> Failure(string error) => new(error);
 }
 
-public Result<Order> CreateOrder(string customer, PizzaType pizza, int quantity)
+public Result<Order> CreateOrder(string customer, BurgerType burger, int quantity)
 {
     if (quantity < 1)
         return Result<Order>.Failure("Quantity must be positive");
     
-    var order = Order.Create(customer, pizza, quantity);
+    var order = Order.Create(customer, burger, quantity);
     return Result<Order>.Success(order);
 }
 ```
@@ -380,12 +380,12 @@ public sealed class Order
     public Money TotalPrice { get; private set; }
     private List<OrderLine> _lines = new();
     
-    public void AddLine(PizzaType pizza, int quantity)
+    public void AddLine(BurgerType burger, int quantity)
     {
         if (quantity < 1)
             throw new DomainException("Quantity must be positive");
         
-        _lines.Add(new OrderLine(pizza, quantity));
+        _lines.Add(new OrderLine(burger, quantity));
         RecalculateTotal();
     }
     
@@ -411,7 +411,7 @@ public sealed class Order
 {
     private Order() { }  // Private constructor
     
-    public static Order Create(string customer, PizzaType pizza, int quantity)
+    public static Order Create(string customer, BurgerType burger, int quantity)
     {
         // Validation and business rules
         if (string.IsNullOrEmpty(customer))
@@ -435,7 +435,7 @@ public sealed class Order
 services.AddSingleton<IMemoryCache, MemoryCache>();
 
 // Scoped - per-request, DbContext
-services.AddScoped<IPizzaDbContext, PizzaDbContext>();
+services.AddScoped<IBurgerDbContext, BurgerDbContext>();
 
 // Transient - lightweight, stateless
 services.AddTransient<IOrderValidator, OrderValidator>();
@@ -473,7 +473,7 @@ public Result<Order> CreateOrder(CreateOrderRequest request)
     if (request.Quantity < 1)
         return Result<Order>.Failure("Invalid quantity");
     
-    var order = Order.Create(request.CustomerName, request.PizzaType, request.Quantity);
+    var order = Order.Create(request.CustomerName, request.BurgerType, request.Quantity);
     return Result<Order>.Success(order);
 }
 ```
@@ -502,7 +502,7 @@ public async Task<Order> LoadOrderAsync(OrderId id)
 public sealed class OrderBuilder
 {
     private string _customer = "Test Customer";
-    private PizzaType _pizza = PizzaType.Margherita;
+    private BurgerType _burger = BurgerType.SmashBurger;
     private int _quantity = 1;
     
     public OrderBuilder WithCustomer(string name)
@@ -511,7 +511,7 @@ public sealed class OrderBuilder
         return this;
     }
     
-    public Order Build() => Order.Create(_customer, _pizza, _quantity);
+    public Order Build() => Order.Create(_customer, _burger, _quantity);
 }
 
 // Usage
@@ -595,4 +595,4 @@ public void ProcessOrder(OrderId orderId, CustomerId customerId, ProductId produ
 - [Clean Architecture by Uncle Bob](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
 
 ## Examples Repository
-See the CloudPizza demo application for real-world examples of all these practices in action.
+See the CloudBurger demo application for real-world examples of all these practices in action.

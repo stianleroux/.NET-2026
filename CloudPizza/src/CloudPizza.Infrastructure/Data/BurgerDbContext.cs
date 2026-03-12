@@ -1,13 +1,13 @@
-namespace CloudPizza.Infrastructure.Data;
+namespace CloudBurger.Infrastructure.Data;
 
-using CloudPizza.Shared.Domain;
+using CloudBurger.Shared.Domain;
 using Microsoft.EntityFrameworkCore;
 
 /// <summary>
-/// Database context for CloudPizza application.
+/// Database context for CloudBurger application.
 /// Uses primary constructor for DI (new in .NET 10).
 /// </summary>
-public sealed class PizzaDbContext(DbContextOptions<PizzaDbContext> options) : DbContext(options)
+public sealed class BurgerDbContext(DbContextOptions<BurgerDbContext> options) : DbContext(options)
 {
     public DbSet<Order> Orders => Set<Order>();
 
@@ -34,8 +34,8 @@ public sealed class PizzaDbContext(DbContextOptions<PizzaDbContext> options) : D
                 .HasMaxLength(100)
                 .IsRequired();
 
-            entity.Property(e => e.PizzaType)
-                .HasColumnName("pizza_type")
+            entity.Property(e => e.BurgerType)
+                .HasColumnName("burger_type")
                 .HasConversion<string>()  // Store enum as string for readability
                 .HasMaxLength(50)
                 .IsRequired();
@@ -71,7 +71,7 @@ public sealed class PizzaDbContext(DbContextOptions<PizzaDbContext> options) : D
             payload = json_build_object(
                 'Id', NEW.id::text,
                 'CustomerName', NEW.customer_name,
-                'PizzaType', NEW.pizza_type,
+                'BurgerType', NEW.burger_type,
                 'Quantity', NEW.quantity,
                 'TotalPrice', NEW.total_price,
                 'CreatedAtUtc', NEW.created_at_utc

@@ -15,8 +15,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CloudPizza.Shared\CloudPizza.Shared.csproj" />
-    <ProjectReference Include="..\CloudPizza.Infrastructure\CloudPizza.Infrastructure.csproj" />
+    <ProjectReference Include="..\CloudPizza.Shared\CloudBurger.Shared.csproj" />
+    <ProjectReference Include="..\CloudPizza.Infrastructure\CloudBurger.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

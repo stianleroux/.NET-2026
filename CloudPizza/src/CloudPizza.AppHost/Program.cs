@@ -6,19 +6,19 @@ var builder = DistributedApplication.CreateBuilder(args);
 // PostgreSQL with persistent data volume for local development
 // Using Aspire's built-in container hosting - no Dockerfile needed
 var postgres = builder.AddPostgres("postgres")
-    .WithDataVolume("cloudpizza-postgres-data")
+    .WithDataVolume("cloudburger-postgres-data")
     .WithPgAdmin(); // Add pgAdmin for database management
 
-var pizzaDb = postgres.AddDatabase("pizzadb");
+var burgerDb = postgres.AddDatabase("burgerdb");
 
 // API service with health checks and OpenTelemetry
-var api = builder.AddProject("api", "../CloudPizza.Api/CloudPizza.Api.csproj")
-    .WithReference(pizzaDb)
+var api = builder.AddProject("api", "../CloudPizza.Api/CloudBurger.Api.csproj")
+    .WithReference(burgerDb)
     .WithEnvironment("ASPNETCORE_FORWARDEDHEADERS_ENABLED", "true") // For Cloudflare Tunnel
-    .WaitFor(pizzaDb); // Ensure database is ready before starting API
+    .WaitFor(burgerDb); // Ensure database is ready before starting API
 
 // Blazor frontend with real-time SSE connection to API
-var web = builder.AddProject("web", "../CloudPizza.Web/CloudPizza.Web.csproj")
+var web = builder.AddProject("web", "../CloudPizza.Web/CloudBurger.Web.csproj")
     .WithReference(api)
     .WaitFor(api);
 

@@ -1,10 +1,10 @@
-namespace CloudPizza.Web.Services;
+namespace CloudBurger.Web.Services;
 
 using System.Text.Json;
-using CloudPizza.Shared.Contracts;
+using CloudBurger.Shared.Contracts;
 
 /// <summary>
-/// Client for communicating with CloudPizza API.
+/// Client for communicating with CloudBurger API.
 /// Uses primary constructor and HttpClient DI.
 /// </summary>
 public sealed class ApiClient(HttpClient httpClient, ILogger<ApiClient> logger)
@@ -15,7 +15,7 @@ public sealed class ApiClient(HttpClient httpClient, ILogger<ApiClient> logger)
     };
 
     /// <summary>
-    /// Create a new pizza order.
+    /// Create a new burger order.
     /// </summary>
     public async Task<CreateOrderResponse?> CreateOrderAsync(
         CreateOrderRequest request,

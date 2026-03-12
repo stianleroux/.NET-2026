@@ -2,7 +2,7 @@
 
 ## Deployment Options
 
-CloudPizza can be deployed to various platforms. This guide covers the most common options.
+CloudBurger can be deployed to various platforms. This guide covers the most common options.
 
 ## Table of Contents
 - [Azure](#azure)
@@ -57,35 +57,35 @@ This will:
 #### 1. Create Azure Resources
 ```bash
 # Resource group
-az group create --name rg-cloudpizza --location eastus
+az group create --name rg-cloudburger --location eastus
 
 # PostgreSQL
 az postgres flexible-server create \
-  --name cloudpizza-db \
-  --resource-group rg-cloudpizza \
+  --name cloudburger-db \
+  --resource-group rg-cloudburger \
   --location eastus \
-  --admin-user cloudpizza \
+  --admin-user cloudburger \
   --admin-password <YourPassword> \
   --sku-name Standard_B1ms
 
 # App Service Plan
 az appservice plan create \
-  --name cloudpizza-plan \
-  --resource-group rg-cloudpizza \
+  --name cloudburger-plan \
+  --resource-group rg-cloudburger \
   --is-linux \
   --sku B1
 
 # Web Apps
 az webapp create \
-  --name cloudpizza-api \
-  --resource-group rg-cloudpizza \
-  --plan cloudpizza-plan \
+  --name cloudburger-api \
+  --resource-group rg-cloudburger \
+  --plan cloudburger-plan \
   --runtime "DOTNET|10.0"
 
 az webapp create \
-  --name cloudpizza-web \
-  --resource-group rg-cloudpizza \
-  --plan cloudpizza-plan \
+  --name cloudburger-web \
+  --resource-group rg-cloudburger \
+  --plan cloudburger-plan \
   --runtime "DOTNET|10.0"
 ```
 
@@ -96,21 +96,21 @@ dotnet publish src/CloudPizza.Api -c Release -o ./publish/api
 dotnet publish src/CloudPizza.Web -c Release -o ./publish/web
 
 # Deploy (using Azure CLI)
-az webapp deploy --resource-group rg-cloudpizza \
-  --name cloudpizza-api \
+az webapp deploy --resource-group rg-cloudburger \
+  --name cloudburger-api \
   --src-path publish/api.zip
 
-az webapp deploy --resource-group rg-cloudpizza \
-  --name cloudpizza-web \
+az webapp deploy --resource-group rg-cloudburger \
+  --name cloudburger-web \
   --src-path publish/web.zip
 ```
 
 #### 3. Configure Connection Strings
 ```bash
 az webapp config connection-string set \
-  --name cloudpizza-api \
-  --resource-group rg-cloudpizza \
-  --settings pizzadb="Host=cloudpizza-db.postgres.database.azure.com;Database=cloudpizza;Username=cloudpizza;Password=<YourPassword>" \
+  --name cloudburger-api \
+  --resource-group rg-cloudburger \
+  --settings burgerdb="Host=cloudburger-db.postgres.database.azure.com;Database=cloudburger;Username=cloudburger;Password=<YourPassword>" \
   --connection-string-type PostgreSQL
 ```
 
@@ -127,7 +127,7 @@ pip install awsebcli
 
 #### 2. Initialize EB
 ```bash
-eb init -p docker cloudpizza-api --region us-east-1
+eb init -p docker cloudburger-api --region us-east-1
 ```
 
 #### 3. Create Dockerfile
@@ -138,35 +138,35 @@ EXPOSE 80
 
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
-COPY ["src/CloudPizza.Api/CloudPizza.Api.csproj", "src/CloudPizza.Api/"]
-COPY ["src/CloudPizza.Shared/CloudPizza.Shared.csproj", "src/CloudPizza.Shared/"]
-COPY ["src/CloudPizza.Infrastructure/CloudPizza.Infrastructure.csproj", "src/CloudPizza.Infrastructure/"]
-RUN dotnet restore "src/CloudPizza.Api/CloudPizza.Api.csproj"
+COPY ["src/CloudPizza.Api/CloudBurger.Api.csproj", "src/CloudPizza.Api/"]
+COPY ["src/CloudPizza.Shared/CloudBurger.Shared.csproj", "src/CloudPizza.Shared/"]
+COPY ["src/CloudPizza.Infrastructure/CloudBurger.Infrastructure.csproj", "src/CloudPizza.Infrastructure/"]
+RUN dotnet restore "src/CloudPizza.Api/CloudBurger.Api.csproj"
 COPY . .
 WORKDIR "/src/src/CloudPizza.Api"
-RUN dotnet build "CloudPizza.Api.csproj" -c Release -o /app/build
-RUN dotnet publish "CloudPizza.Api.csproj" -c Release -o /app/publish
+RUN dotnet build "CloudBurger.Api.csproj" -c Release -o /app/build
+RUN dotnet publish "CloudBurger.Api.csproj" -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app
 COPY --from=build /app/publish .
-ENTRYPOINT ["dotnet", "CloudPizza.Api.dll"]
+ENTRYPOINT ["dotnet", "CloudBurger.Api.dll"]
 ```
 
 #### 4. Deploy
 ```bash
-eb create cloudpizza-api-env
+eb create cloudburger-api-env
 eb deploy
 ```
 
 ### AWS RDS for PostgreSQL
 ```bash
 aws rds create-db-instance \
-  --db-instance-identifier cloudpizza-db \
+  --db-instance-identifier cloudburger-db \
   --db-instance-class db.t3.micro \
   --engine postgres \
   --engine-version 17 \
-  --master-username cloudpizza \
+  --master-username cloudburger \
   --master-user-password <YourPassword> \
   --allocated-storage 20
 ```
@@ -186,15 +186,15 @@ services:
   postgres:
     image: postgres:17
     environment:
-      POSTGRES_USER: cloudpizza
-      POSTGRES_PASSWORD: cloudpizza
-      POSTGRES_DB: cloudpizza
+      POSTGRES_USER: cloudburger
+      POSTGRES_PASSWORD: cloudburger
+      POSTGRES_DB: cloudburger
     ports:
       - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U cloudpizza"]
+      test: ["CMD-SHELL", "pg_isready -U cloudburger"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -205,7 +205,7 @@ services:
       dockerfile: src/CloudPizza.Api/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - ConnectionStrings__pizzadb=Host=postgres;Database=cloudpizza;Username=cloudpizza;Password=cloudpizza
+      - ConnectionStrings__burgerdb=Host=postgres;Database=cloudburger;Username=cloudburger;Password=cloudburger
     ports:
       - "5000:8080"
     depends_on:
@@ -310,22 +310,22 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cloudpizza-api
+  name: cloudburger-api
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: cloudpizza-api
+      app: cloudburger-api
   template:
     metadata:
       labels:
-        app: cloudpizza-api
+        app: cloudburger-api
     spec:
       containers:
       - name: api
-        image: your-registry/cloudpizza-api:latest
+        image: your-registry/cloudburger-api:latest
         env:
-        - name: ConnectionStrings__pizzadb
+        - name: ConnectionStrings__burgerdb
           valueFrom:
             secretKeyRef:
               name: postgres-secret
@@ -336,11 +336,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: cloudpizza-api
+  name: cloudburger-api
 spec:
   type: LoadBalancer
   selector:
-    app: cloudpizza-api
+    app: cloudburger-api
   ports:
   - port: 80
     targetPort: 8080
@@ -370,7 +370,7 @@ This is a more advanced scenario. Consider Azure/AWS for easier Blazor Server de
 
 ### Required for API
 ```bash
-ConnectionStrings__pizzadb="Host=...;Database=...;Username=...;Password=..."
+ConnectionStrings__burgerdb="Host=...;Database=...;Username=...;Password=..."
 ASPNETCORE_ENVIRONMENT="Production"
 ```
 

@@ -1,6 +1,6 @@
 // Result pattern implementation to avoid exception-driven flow
 // Demonstrates: Generic types, discriminated unions pattern, fluent API
-namespace CloudPizza.Shared.Common;
+namespace CloudBurger.Shared.Common;
 
 /// <summary>
 /// Result pattern for explicit error handling without exceptions.

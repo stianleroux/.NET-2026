@@ -1,4 +1,4 @@
-# Contributing to CloudPizza
+# Contributing to CloudBurger
 
 Thank you for your interest in contributing! This is a demo application designed for conference talks.
 

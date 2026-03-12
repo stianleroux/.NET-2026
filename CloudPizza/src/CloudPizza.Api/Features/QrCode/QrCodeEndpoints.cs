@@ -1,6 +1,6 @@
-namespace CloudPizza.Api.Features.QrCode;
+namespace CloudBurger.Api.Features.QrCode;
 
-using CloudPizza.Infrastructure.Services;
+using CloudBurger.Infrastructure.Services;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 /// <summary>

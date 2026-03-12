@@ -1,6 +1,6 @@
-# C# 14 & ASP.NET 10 Features in CloudPizza
+# C# 14 & ASP.NET 10 Features in CloudBurger
 
-This document outlines modern C# 14 and ASP.NET 10 features implemented in CloudPizza, plus opportunities for future enhancement.
+This document outlines modern C# 14 and ASP.NET 10 features implemented in CloudBurger, plus opportunities for future enhancement.
 
 ## ✅ Already Implemented Features
 
@@ -92,7 +92,7 @@ Cleaner code structure
 
 ```csharp
 // Every file starts with
-namespace CloudPizza.Features.Orders;
+namespace CloudBurger.Features.Orders;
 
 // No closing brace needed
 ```
@@ -104,7 +104,7 @@ Enforce initialization in records
 public sealed record CreateOrderRequest
 {
     public required string CustomerName { get; init; }
-    public required string PizzaType { get; init; }
+    public required string BurgerType { get; init; }
     public required int Quantity { get; init; }
 }
 // → Compile error if not initialized
@@ -117,7 +117,7 @@ Immutable value objects
 public sealed record OrderResponse(
     Guid Id,
     string CustomerName,
-    string PizzaType,
+    string BurgerType,
     int Quantity,
     DateTime CreatedAtUtc,
     decimal TotalPrice);
@@ -267,7 +267,7 @@ order?.AssignDeliveryAddress(address);
 Performance for value types
 
 ```csharp
-// Money struct example (not in CloudPizza but useful)
+// Money struct example (not in CloudBurger but useful)
 public struct Money(string currency, decimal amount)
 {
     public void operator +=(Money other)
@@ -332,7 +332,7 @@ var total = CalculateTotal(new[] { order1, order2 }); // Just works!
 - [ ] Already Done - No changes needed!
 
 ### Phase 2: High-Impact Features (Next Sprint)
-1. **Field Keyword** - Add to Order, OrderId, PizzaType Domain Models
+1. **Field Keyword** - Add to Order, OrderId, BurgerType Domain Models
    - Simplify validation logic
    - Remove manual backing fields
    - ~15 min implementation
@@ -382,7 +382,7 @@ public sealed class Order
         private init => field = (value ?? string.Empty).Trim();
     }
     
-    public PizzaType PizzaType
+    public BurgerType BurgerType
     {
         get => field;
         private init => field = value;
@@ -447,7 +447,7 @@ dotnet test /p:CollectCoverage=true
 
 ## 📊 Feature Matrix
 
-| Feature              | CloudPizza | C# Version | Priority |
+| Feature              | CloudBurger | C# Version | Priority |
 | -------------------- | ---------- | ---------- | -------- |
 | Minimal APIs         | ✅          | 8.0+       | ✅ Done   |
 | Validation           | ✅          | 8.0+       | ✅ Done   |

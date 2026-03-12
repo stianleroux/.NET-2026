@@ -14,7 +14,7 @@ dotnet workload install aspire
 #### Error: "Could not find a part of the path"
 **Solution:** Ensure you're running from the solution root:
 ```bash
-cd CloudPizza
+cd CloudBurger
 dotnet build
 ```
 
@@ -41,7 +41,7 @@ dotnet ef database update
 **Solution:**
 1. Connect to PostgreSQL:
    ```bash
-   docker exec -it cloudpizza-postgres psql -U postgres -d cloudpizza
+   docker exec -it cloudburger-postgres psql -U postgres -d cloudburger
    ```
 2. Verify trigger exists:
    ```sql
@@ -147,7 +147,7 @@ Add to `appsettings.Production.json`:
 ```json
 {
   "ConnectionStrings": {
-    "pizzadb": "${DATABASE_URL}"
+    "burgerdb": "${DATABASE_URL}"
   }
 }
 ```
@@ -163,7 +163,7 @@ Add to `appsettings.Development.json`:
       "Default": "Debug",
       "Microsoft.AspNetCore": "Information",
       "Microsoft.EntityFrameworkCore": "Information",
-      "CloudPizza": "Debug"
+      "CloudBurger": "Debug"
     }
   }
 }
@@ -180,10 +180,10 @@ Add to `appsettings.Development.json`:
 ### Database Query Logging
 ```bash
 # PostgreSQL logs
-docker logs cloudpizza-postgres -f
+docker logs cloudburger-postgres -f
 
 # Or connect and enable statement logging
-docker exec -it cloudpizza-postgres psql -U postgres
+docker exec -it cloudburger-postgres psql -U postgres
 ALTER SYSTEM SET log_statement = 'all';
 SELECT pg_reload_conf();
 ```
@@ -247,10 +247,10 @@ netstat -an | findstr "5000 5001 7174"  # Windows
 netstat -an | grep "5000\|5001\|7174"   # Linux/Mac
 
 # Test database connection
-docker exec cloudpizza-postgres pg_isready -U postgres
+docker exec cloudburger-postgres pg_isready -U postgres
 
 # View recent logs
-docker logs cloudpizza-postgres --tail 50
+docker logs cloudburger-postgres --tail 50
 ```
 
 ## Reset Everything

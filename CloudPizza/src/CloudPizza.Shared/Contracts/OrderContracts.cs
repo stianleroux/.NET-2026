@@ -2,7 +2,7 @@
 // Demonstrates: Records for DTOs, required members, init-only setters
 using System.ComponentModel.DataAnnotations;
 
-namespace CloudPizza.Shared.Contracts;
+namespace CloudBurger.Shared.Contracts;
 
 /// <summary>
 /// Request to create a new order.
@@ -16,7 +16,7 @@ public sealed record CreateOrderRequest
     public required string CustomerName { get; init; }
 
     [Required]
-    public required string PizzaType { get; init; }
+    public required string BurgerType { get; init; }
 
     [Range(1, 50)]
     public required int Quantity { get; init; }
@@ -29,7 +29,7 @@ public sealed record CreateOrderResponse
 {
     public required string OrderId { get; init; }
     public required string CustomerName { get; init; }
-    public required string PizzaType { get; init; }
+    public required string BurgerType { get; init; }
     public required int Quantity { get; init; }
     public required decimal TotalPrice { get; init; }
     public required DateTime CreatedAtUtc { get; init; }
@@ -42,7 +42,7 @@ public sealed record OrderDto
 {
     public required string OrderId { get; init; }
     public required string CustomerName { get; init; }
-    public required string PizzaType { get; init; }
+    public required string BurgerType { get; init; }
     public required int Quantity { get; init; }
     public required decimal TotalPrice { get; init; }
     public required DateTime CreatedAtUtc { get; init; }

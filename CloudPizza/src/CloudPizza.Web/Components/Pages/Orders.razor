@@ -1,11 +1,11 @@
 @page "/orders"
-@using CloudPizza.Shared.Contracts
-@using CloudPizza.Web.Services
+@using CloudBurger.Shared.Contracts
+@using CloudBurger.Web.Services
 @inject ApiClient ApiClient
 @inject ILogger<Orders> Logger
 @implements IAsyncDisposable
 
-<PageTitle>Live Orders - CloudPizza</PageTitle>
+<PageTitle>Live Orders - CloudBurger</PageTitle>
 
 <div class="container">
     <h1 class="mb-4">📊 Live Order Feed</h1>
@@ -54,7 +54,7 @@
                             }
                             <h5 class="card-title">@order.CustomerName</h5>
                             <p class="card-text">
-                                <strong>Pizza:</strong> @order.PizzaType<br />
+                                <strong>Burger:</strong> @order.BurgerType<br />
                                 <strong>Quantity:</strong> @order.Quantity<br />
                                 <strong>Total:</strong> $@order.TotalPrice
                             </p>

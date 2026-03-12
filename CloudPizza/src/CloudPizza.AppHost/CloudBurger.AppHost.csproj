@@ -16,8 +16,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CloudPizza.Api\CloudPizza.Api.csproj" />
-    <ProjectReference Include="..\CloudPizza.Web\CloudPizza.Web.csproj" />
+    <ProjectReference Include="..\CloudPizza.Api\CloudBurger.Api.csproj" />
+    <ProjectReference Include="..\CloudPizza.Web\CloudBurger.Web.csproj" />
   </ItemGroup>
 
 </Project>

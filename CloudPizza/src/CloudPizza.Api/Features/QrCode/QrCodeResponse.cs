@@ -1,4 +1,4 @@
-namespace CloudPizza.Api.Features.QrCode;
+namespace CloudBurger.Api.Features.QrCode;
 
 /// <summary>
 /// Response DTO for Base64 QR code.

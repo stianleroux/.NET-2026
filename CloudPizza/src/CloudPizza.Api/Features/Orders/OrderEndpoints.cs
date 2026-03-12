@@ -1,15 +1,15 @@
 // Order endpoints using Minimal API route groups
 // Demonstrates: Route groups, typed results, validation, Result pattern, SSE
 using System.Text.Json;
-using CloudPizza.Infrastructure.Data;
-using CloudPizza.Infrastructure.Notifications;
-using CloudPizza.Shared.Contracts;
-using CloudPizza.Shared.Domain;
+using CloudBurger.Infrastructure.Data;
+using CloudBurger.Infrastructure.Notifications;
+using CloudBurger.Shared.Contracts;
+using CloudBurger.Shared.Domain;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Results.Models;
 
-namespace CloudPizza.Api.Features.Orders;
+namespace CloudBurger.Api.Features.Orders;
 
 /// <summary>
 /// Extension methods to register order-related endpoints.
@@ -25,8 +25,8 @@ public static class OrderEndpoints
         // POST /api/orders - Create new order
         orders.MapPost("/", CreateOrderAsync)
             .WithName("CreateOrder")
-            .WithSummary("Create a new pizza order")
-            .WithDescription("Creates a new pizza order with validation. Returns the created order details.")
+            .WithSummary("Create a new burger order")
+            .WithDescription("Creates a new burger order with validation. Returns the created order details.")
             .Produces<CreateOrderResponse>(StatusCodes.Status201Created)
             .ProducesValidationProblem()
             .ProducesProblem(StatusCodes.Status400BadRequest);
@@ -35,7 +35,7 @@ public static class OrderEndpoints
         orders.MapGet("/", GetOrdersAsync)
             .WithName("GetOrders")
             .WithSummary("Get recent orders")
-            .WithDescription("Retrieves the most recent pizza orders.")
+            .WithDescription("Retrieves the most recent burger orders.")
             .Produces<List<OrderDto>>(StatusCodes.Status200OK);
 
         // GET /api/orders/stream - SSE stream of new orders
@@ -50,25 +50,25 @@ public static class OrderEndpoints
     }
 
     /// <summary>
-    /// Create a new pizza order with validation and Result pattern.
+    /// Create a new burger order with validation and Result pattern.
     /// Demonstrates: Typed results, validation, Result pattern, strongly-typed IDs.
     /// </summary>
     private static async Task<Results<Created<CreateOrderResponse>, ValidationProblem, ProblemHttpResult>> CreateOrderAsync(
         CreateOrderRequest request,
-        PizzaDbContext dbContext,
+        BurgerDbContext dbContext,
         CancellationToken cancellationToken)
     {
-        // Parse pizza type
-        if (!Enum.TryParse<PizzaType>(request.PizzaType, ignoreCase: true, out var pizzaType))
+        // Parse burger type
+        if (!Enum.TryParse<BurgerType>(request.BurgerType, ignoreCase: true, out var burgerType))
         {
             return TypedResults.ValidationProblem(new Dictionary<string, string[]>
             {
-                ["PizzaType"] = [$"Invalid pizza type. Valid values: {string.Join(", ", Enum.GetNames<PizzaType>())}"]
+                ["BurgerType"] = [$"Invalid burger type. Valid values: {string.Join(", ", Enum.GetNames<BurgerType>())}"]
             });
         }
 
         // Create domain entity (enforces business rules) using Result pattern with ValidationFailure
-        var orderResult = Order.Create(request.CustomerName, pizzaType, request.Quantity);
+        var orderResult = Order.Create(request.CustomerName, burgerType, request.Quantity);
 
         // Handle validation failures using pattern matching
         if (orderResult.IsFailure)
@@ -92,7 +92,7 @@ public static class OrderEndpoints
         {
             OrderId = order.Id.ToString(),
             CustomerName = order.CustomerName,
-            PizzaType = order.PizzaType.GetDisplayName(),
+            BurgerType = order.BurgerType.GetDisplayName(),
             Quantity = order.Quantity,
             TotalPrice = order.TotalPrice,
             CreatedAtUtc = order.CreatedAtUtc
@@ -106,7 +106,7 @@ public static class OrderEndpoints
     /// Demonstrates: Async queries, projection, mapping.
     /// </summary>
     private static async Task<Ok<List<OrderDto>>> GetOrdersAsync(
-        PizzaDbContext dbContext,
+        BurgerDbContext dbContext,
         int limit = 50,
         CancellationToken cancellationToken = default)
     {
@@ -117,7 +117,7 @@ public static class OrderEndpoints
             {
                 OrderId = o.Id.ToString(),
                 CustomerName = o.CustomerName,
-                PizzaType = o.PizzaType.ToString(),
+                BurgerType = o.BurgerType.ToString(),
                 Quantity = o.Quantity,
                 TotalPrice = o.TotalPrice,
                 CreatedAtUtc = o.CreatedAtUtc

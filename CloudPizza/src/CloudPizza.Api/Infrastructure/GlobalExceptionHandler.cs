@@ -1,4 +1,4 @@
-namespace CloudPizza.Api.Infrastructure;
+namespace CloudBurger.Api.Infrastructure;
 
 using System.Diagnostics;
 using Microsoft.AspNetCore.Diagnostics;

@@ -1,7 +1,7 @@
 // Blazor Web App with InteractiveServer components
 // Demonstrates: Modern Blazor architecture, service discovery via Aspire
-using CloudPizza.Web.Components;
-using CloudPizza.Web.Services;
+using CloudBurger.Web.Components;
+using CloudBurger.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,8 +12,14 @@ builder.Services.AddRazorComponents()
 // Add HTTP clients for API communication with service discovery
 builder.Services.AddHttpClient<ApiClient>(client =>
 {
+    // Local/dev fallback for running Web + API without AppHost
+    var configuredApiBaseUrl = builder.Configuration["ApiBaseUrl"];
+
     // Aspire service discovery - 'api' is the service name from AppHost
-    client.BaseAddress = new Uri("https+http://api");
+    // Used when ApiBaseUrl is not configured.
+    client.BaseAddress = string.IsNullOrWhiteSpace(configuredApiBaseUrl)
+        ? new Uri("https+http://api")
+        : new Uri(configuredApiBaseUrl);
 });
 
 var app = builder.Build();

@@ -1,6 +1,6 @@
-namespace CloudPizza.Infrastructure.Services;
+namespace CloudBurger.Infrastructure.Services;
 
-using CloudPizza.Shared.Common;
+using CloudBurger.Shared.Common;
 using QRCoder;
 
 /// <summary>

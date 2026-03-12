@@ -1,8 +1,8 @@
 // Strongly-typed ID for Orders - prevents primitive obsession
 // Demonstrates: Records, required members, value object pattern, FluentValidation
-namespace CloudPizza.Shared.Domain;
+namespace CloudBurger.Shared.Domain;
 
-using CloudPizza.Shared.Common;
+using CloudBurger.Shared.Common;
 using FluentValidation;
 
 /// <summary>

@@ -1,8 +1,8 @@
-namespace CloudPizza.Infrastructure.Notifications;
+namespace CloudBurger.Infrastructure.Notifications;
 
 using System.Text.Json;
 using System.Threading.Channels;
-using CloudPizza.Shared.Contracts;
+using CloudBurger.Shared.Contracts;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -38,8 +38,8 @@ public sealed partial class PostgresNotificationService(IConfiguration configura
     {
         logger.LogInformation("PostgreSQL LISTEN service starting...");
 
-        var connectionString = configuration.GetConnectionString("pizzadb")
-            ?? throw new InvalidOperationException("Database connection string 'pizzadb' not found");
+        var connectionString = configuration.GetConnectionString("burgerdb")
+            ?? throw new InvalidOperationException("Database connection string 'burgerdb' not found");
 
         await using var connection = new NpgsqlConnection(connectionString);
 
@@ -64,7 +64,7 @@ public sealed partial class PostgresNotificationService(IConfiguration configura
                         {
                             OrderId = orderData.Id,
                             CustomerName = orderData.CustomerName,
-                            PizzaType = orderData.PizzaType,
+                            BurgerType = orderData.BurgerType,
                             Quantity = orderData.Quantity,
                             TotalPrice = orderData.TotalPrice,
                             CreatedAtUtc = orderData.CreatedAtUtc

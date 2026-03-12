@@ -1,8 +1,9 @@
-namespace CloudPizza.Tests.Domain;
+namespace CloudBurger.Tests.Domain;
 
-using CloudPizza.Shared.Domain;
+using CloudBurger.Shared.Domain;
 using TUnit;
 using TUnit.Assertions;
+using TUnit.Assertions.AssertConditions.Throws;
 
 /// <summary>
 /// Comprehensive tests for Order domain model.
@@ -15,15 +16,16 @@ public partial class OrderTests
 	public async Task Create_WithValidData_CreatesOrder()
 	{
 		// Arrange & Act
-		var order = Order.Create("John Doe", PizzaType.Margherita, 2);
+		var orderResult = Order.Create("John Doe", BurgerType.SmashBurger, 2);
+		var order = orderResult.Value;
 
 		// Assert
 		await Assert.That(order)
 			.IsNotNull();
 		await Assert.That(order.CustomerName)
 			.IsEqualTo("John Doe");
-		await Assert.That(order.PizzaType)
-			.IsEqualTo(PizzaType.Margherita);
+		await Assert.That(order.BurgerType)
+			.IsEqualTo(BurgerType.SmashBurger);
 		await Assert.That(order.Quantity)
 			.IsEqualTo(2);
 	}
@@ -32,11 +34,12 @@ public partial class OrderTests
 	public async Task Create_AssignsNewOrderId()
 	{
 		// Act
-		var order = Order.Create("Jane Smith", PizzaType.Pepperoni, 1);
+		var orderResult = Order.Create("Jane Smith", BurgerType.CrispyChicken, 1);
+		var order = orderResult.Value;
 
 		// Assert
-		await Assert.That(order.Id)
-			.IsNotEqualTo(OrderId.Empty);
+		await Assert.That(order.Id.Value)
+			.IsNotEqualTo(Guid.Empty);
 	}
 
 	[Test]
@@ -46,7 +49,8 @@ public partial class OrderTests
 		var beforeCreation = DateTime.UtcNow;
 
 		// Act
-		var order = Order.Create("Bob Johnson", PizzaType.Veggie, 3);
+		var orderResult = Order.Create("Bob Johnson", BurgerType.VeggieBean, 3);
+		var order = orderResult.Value;
 
 		var afterCreation = DateTime.UtcNow;
 
@@ -61,7 +65,8 @@ public partial class OrderTests
 	public async Task Create_CalculatesTotalPrice()
 	{
 		// Act
-		var order = Order.Create("Alice Chen", PizzaType.Hawaiian, 2);
+		var orderResult = Order.Create("Alice Chen", BurgerType.BBQBacon, 2);
+		var order = orderResult.Value;
 
 		// Assert
 		await Assert.That(order.TotalPrice)
@@ -69,79 +74,86 @@ public partial class OrderTests
 	}
 
 	[Test]
-	[Arguments("", PizzaType.Margherita, 1)]
-	[Arguments(" ", PizzaType.Margherita, 1)]
-	[Arguments(null, PizzaType.Margherita, 1)]
-	public async Task Create_WithNullOrEmptyCustomerName_ThrowsArgumentException(
-		string customerName, PizzaType pizzaType, int quantity)
+	[Arguments("", BurgerType.SmashBurger, 1)]
+	[Arguments(" ", BurgerType.SmashBurger, 1)]
+	[Arguments(null, BurgerType.SmashBurger, 1)]
+	public async Task Create_WithNullOrEmptyCustomerName_ReturnsFailure(
+		string customerName, BurgerType burgerType, int quantity)
 	{
-		// Act & Assert
-		var exception = await Assert.That(
-			() => Order.Create(customerName!, pizzaType, quantity)
-		).Throws<ArgumentException>();
+		// Act
+		var result = Order.Create(customerName!, burgerType, quantity);
 
-		await Assert.That(exception.ParamName)
-			.IsEqualTo("customerName");
+		// Assert
+		await Assert.That(result.IsFailure)
+			.IsTrue();
+		await Assert.That(result.ValidationErrors)
+			.IsNotNull();
 	}
 
 	[Test]
-	public async Task Create_WithCustomerNameTooShort_ThrowsArgumentException()
+	public async Task Create_WithCustomerNameTooShort_ReturnsFailure()
 	{
-		// Act & Assert
-		var exception = await Assert.That(
-			() => Order.Create("A", PizzaType.Margherita, 1)
-		).Throws<ArgumentException>();
+		// Act
+		var result = Order.Create("A", BurgerType.SmashBurger, 1);
 
-		await Assert.That(exception.ParamName)
-			.IsEqualTo("customerName");
+		// Assert
+		await Assert.That(result.IsFailure)
+			.IsTrue();
+		await Assert.That(result.ValidationErrors)
+			.IsNotNull();
 	}
 
 	[Test]
-	public async Task Create_WithCustomerNameTooLong_ThrowsArgumentException()
+	public async Task Create_WithCustomerNameTooLong_ReturnsFailure()
 	{
 		// Arrange
 		var longName = new string('A', 101);
 
-		// Act & Assert
-		var exception = await Assert.That(
-			() => Order.Create(longName, PizzaType.Margherita, 1)
-		).Throws<ArgumentException>();
+		// Act
+		var result = Order.Create(longName, BurgerType.SmashBurger, 1);
 
-		await Assert.That(exception.ParamName)
-			.IsEqualTo("customerName");
+		// Assert
+		await Assert.That(result.IsFailure)
+			.IsTrue();
+		await Assert.That(result.ValidationErrors)
+			.IsNotNull();
 	}
 
 	[Test]
-	public async Task Create_WithQuantityZero_ThrowsArgumentException()
+	public async Task Create_WithQuantityZero_ReturnsFailure()
 	{
-		// Act & Assert
-		var exception = await Assert.That(
-			() => Order.Create("John Doe", PizzaType.Margherita, 0)
-		).Throws<ArgumentException>();
+		// Act
+		var result = Order.Create("John Doe", BurgerType.SmashBurger, 0);
 
-		await Assert.That(exception.ParamName)
-			.IsEqualTo("quantity");
+		// Assert
+		await Assert.That(result.IsFailure)
+			.IsTrue();
+		await Assert.That(result.ValidationErrors)
+			.IsNotNull();
 	}
 
 	[Test]
-	public async Task Create_WithQuantityNegative_ThrowsArgumentException()
+	public async Task Create_WithQuantityNegative_ReturnsFailure()
 	{
-		// Act & Assert
-		await Assert.That(
-			() => Order.Create("John Doe", PizzaType.Margherita, -5)
-		).Throws<ArgumentException>();
+		// Act
+		var result = Order.Create("John Doe", BurgerType.SmashBurger, -5);
+
+		// Assert
+		await Assert.That(result.IsFailure)
+			.IsTrue();
 	}
 
 	[Test]
-	public async Task Create_WithQuantityExceedsMaximum_ThrowsArgumentException()
+	public async Task Create_WithQuantityExceedsMaximum_ReturnsFailure()
 	{
-		// Act & Assert
-		var exception = await Assert.That(
-			() => Order.Create("John Doe", PizzaType.Margherita, 51)
-		).Throws<ArgumentException>();
+		// Act
+		var result = Order.Create("John Doe", BurgerType.SmashBurger, 51);
 
-		await Assert.That(exception.ParamName)
-			.IsEqualTo("quantity");
+		// Assert
+		await Assert.That(result.IsFailure)
+			.IsTrue();
+		await Assert.That(result.ValidationErrors)
+			.IsNotNull();
 	}
 
 	[Test]
@@ -151,7 +163,8 @@ public partial class OrderTests
 	public async Task Create_WithValidQuantity_Succeeds(int quantity)
 	{
 		// Act
-		var order = Order.Create("John Doe", PizzaType.Margherita, quantity);
+		var orderResult = Order.Create("John Doe", BurgerType.SmashBurger, quantity);
+		var order = orderResult.Value;
 
 		// Assert
 		await Assert.That(order.Quantity)
@@ -162,27 +175,29 @@ public partial class OrderTests
 	public async Task Create_TrimsCustomerName()
 	{
 		// Act
-		var order = Order.Create("  John Doe  ", PizzaType.Margherita, 1);
+		var orderResult = Order.Create("  John Doe  ", BurgerType.SmashBurger, 1);
+		var order = orderResult.Value;
 
-		// Assert
-		await Assert.That(order.CustomerName)
+        // Assert
+        await Assert.That(order.CustomerName)
 			.IsEqualTo("John Doe");
 	}
 
 	[Test]
-	[Arguments(PizzaType.Margherita)]
-	[Arguments(PizzaType.Pepperoni)]
-	[Arguments(PizzaType.Veggie)]
-	[Arguments(PizzaType.Hawaiian)]
-	[Arguments(PizzaType.BBQChicken)]
-	public async Task Create_WithValidPizzaType_Succeeds(PizzaType pizzaType)
+	[Arguments(BurgerType.SmashBurger)]
+	[Arguments(BurgerType.CrispyChicken)]
+	[Arguments(BurgerType.VeggieBean)]
+	[Arguments(BurgerType.BBQBacon)]
+	[Arguments(BurgerType.GrilledChicken)]
+	public async Task Create_WithValidBurgerType_Succeeds(BurgerType burgerType)
 	{
 		// Act
-		var order = Order.Create("John Doe", pizzaType, 1);
+		var orderResult = Order.Create("John Doe", burgerType, 1);
+		var order = orderResult.Value;
 
 		// Assert
-		await Assert.That(order.PizzaType)
-			.IsEqualTo(pizzaType);
+		await Assert.That(order.BurgerType)
+			.IsEqualTo(burgerType);
 	}
 
 	[Test]
@@ -192,12 +207,14 @@ public partial class OrderTests
 		var id = OrderId.New();
 
 		// Act
-		var id1 = new OrderId(id.Value);
-		var id2 = new OrderId(id.Value);
+		var id1Result = OrderId.Create(id.Value);
+		var id2Result = OrderId.Create(id.Value);
 
 		// Assert
-		await Assert.That(id1)
-			.IsEqualTo(id2);
+		await Assert.That(id1Result.IsSuccess).IsTrue();
+		await Assert.That(id2Result.IsSuccess).IsTrue();
+		await Assert.That(id1Result.Value)
+			.IsEqualTo(id2Result.Value);
 	}
 
 	[Test]
@@ -217,7 +234,7 @@ public partial class OrderTests
 	{
 		// Act
 		var orders = Enumerable.Range(0, 10)
-			.Select(_ => Order.Create("Customer", PizzaType.Margherita, 1))
+			.Select(_ => Order.Create("Customer", BurgerType.SmashBurger, 1).Value)
 			.ToList();
 
 		// Assert
@@ -227,31 +244,26 @@ public partial class OrderTests
 	}
 
 	[Test]
-	public async Task NegativeQuantity_ThrowsArgumentException()
+	public async Task NegativeQuantity_ReturnsFailure()
 	{
-		// Act & Assert
-		await Assert.That(
-			() => Order.Create("John", PizzaType.Margherita, -1)
-		).Throws<ArgumentException>();
+		// Act
+		var result = Order.Create("John", BurgerType.SmashBurger, -1);
+
+		// Assert
+		await Assert.That(result.IsFailure)
+			.IsTrue();
 	}
 
 	[Test]
 	public async Task PriceCalculation_IsPositive()
 	{
 		// Act
-		var order = Order.Create("John", PizzaType.Pepperoni, 5);
+		var orderResult = Order.Create("John", BurgerType.CrispyChicken, 5);
+		var order = orderResult.Value;
 
 		// Assert
 		await Assert.That(order.TotalPrice)
 			.IsGreaterThan(0);
-	}
-
-	[Test]
-	public async Task OrderId_Empty_HasDefaultValue()
-	{
-		// Assert
-		await Assert.That(OrderId.Empty.Value)
-			.IsEqualTo(Guid.Empty);
 	}
 
 	[Test]
@@ -269,8 +281,8 @@ public partial class OrderTests
 	public async Task TwoOrders_CreatedInSequence_HaveDifferentIds()
 	{
 		// Act
-		var order1 = Order.Create("Alice", PizzaType.Margherita, 1);
-		var order2 = Order.Create("Bob", PizzaType.Pepperoni, 2);
+		var order1 = Order.Create("Alice", BurgerType.SmashBurger, 1).Value;
+		var order2 = Order.Create("Bob", BurgerType.CrispyChicken, 2).Value;
 
 		// Assert
 		await Assert.That(order1.Id)
@@ -278,19 +290,20 @@ public partial class OrderTests
 	}
 
 	[Test]
-	[Arguments(PizzaType.Margherita, 1)]
-	[Arguments(PizzaType.Pepperoni, 2)]
-	[Arguments(PizzaType.Veggie, 3)]
-	[Arguments(PizzaType.Hawaiian, 4)]
-	[Arguments(PizzaType.BBQChicken, 5)]
-	public async Task Create_VariousPizzasAndQuantities_Succeeds(PizzaType pizza, int qty)
+	[Arguments(BurgerType.SmashBurger, 1)]
+	[Arguments(BurgerType.CrispyChicken, 2)]
+	[Arguments(BurgerType.VeggieBean, 3)]
+	[Arguments(BurgerType.BBQBacon, 4)]
+	[Arguments(BurgerType.GrilledChicken, 5)]
+	public async Task Create_VariousBurgersAndQuantities_Succeeds(BurgerType burger, int qty)
 	{
 		// Act
-		var order = Order.Create("Customer", pizza, qty);
+		var orderResult = Order.Create("Customer", burger, qty);
+		var order = orderResult.Value;
 
 		// Assert
-		await Assert.That(order.PizzaType)
-			.IsEqualTo(pizza);
+		await Assert.That(order.BurgerType)
+			.IsEqualTo(burger);
 		await Assert.That(order.Quantity)
 			.IsEqualTo(qty);
 	}

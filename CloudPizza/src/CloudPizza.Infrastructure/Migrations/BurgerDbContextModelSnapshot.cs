@@ -1,13 +1,13 @@
-namespace CloudPizza.Infrastructure.Migrations;
+namespace CloudBurger.Infrastructure.Migrations;
 
-using CloudPizza.Infrastructure.Data;
+using CloudBurger.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 
 #nullable disable
 
-[DbContext(typeof(PizzaDbContext))]
-partial class PizzaDbContextModelSnapshot : ModelSnapshot
+[DbContext(typeof(BurgerDbContext))]
+partial class BurgerDbContextModelSnapshot : ModelSnapshot
 {
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -19,7 +19,7 @@ partial class PizzaDbContextModelSnapshot : ModelSnapshot
         NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "uuid-ossp");
         NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-        modelBuilder.Entity("CloudPizza.Shared.Domain.Order", b =>
+        modelBuilder.Entity("CloudBurger.Shared.Domain.Order", b =>
             {
                 b.Property<Guid>("Id")
                     .HasColumnType("uuid")
@@ -35,11 +35,11 @@ partial class PizzaDbContextModelSnapshot : ModelSnapshot
                     .HasColumnType("character varying(100)")
                     .HasColumnName("customer_name");
 
-                b.Property<string>("PizzaType")
+                b.Property<string>("BurgerType")
                     .IsRequired()
                     .HasMaxLength(50)
                     .HasColumnType("character varying(50)")
-                    .HasColumnName("pizza_type");
+                    .HasColumnName("burger_type");
 
                 b.Property<int>("Quantity")
                     .HasColumnType("integer")

@@ -1,6 +1,6 @@
-# CloudPizza Documentation Index
+# CloudBurger Documentation Index
 
-Welcome to the CloudPizza documentation! This project demonstrates modern .NET 10 best practices with clean architecture, the Result pattern, and functional programming principles.
+Welcome to the CloudBurger documentation! This project demonstrates modern .NET 10 best practices with clean architecture, the Result pattern, and functional programming principles.
 
 ## 📚 Documentation
 
@@ -58,13 +58,13 @@ Welcome to the CloudPizza documentation! This project demonstrates modern .NET 1
 ## 🏗️ Project Structure
 
 ```
-CloudPizza/
+CloudBurger/
 ├── src/
-│   ├── CloudPizza.Api/              # REST API with Minimal APIs
-│   ├── CloudPizza.Web/              # Blazor frontend
-│   ├── CloudPizza.Shared/           # Common code & domain
-│   ├── CloudPizza.Infrastructure/   # Data access & services
-│   └── CloudPizza.AppHost/          # Aspire orchestration
+│   ├── CloudBurger.Api/              # REST API with Minimal APIs
+│   ├── CloudBurger.Web/              # Blazor frontend
+│   ├── CloudBurger.Shared/           # Common code & domain
+│   ├── CloudBurger.Infrastructure/   # Data access & services
+│   └── CloudBurger.AppHost/          # Aspire orchestration
 │
 ├── docs/                            # Documentation (you are here!)
 │   ├── INDEX.md                     # This file
@@ -274,4 +274,4 @@ var entity = result.Value;
 
 ---
 
-**Welcome to CloudPizza! Happy coding! 🍕**
+**Welcome to CloudBurger! Happy coding! 🍕**

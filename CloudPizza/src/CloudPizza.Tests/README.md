@@ -1,4 +1,4 @@
-# CloudPizza Test Suite & Mocking Patterns
+# CloudBurger Test Suite & Mocking Patterns
 
 This directory contains a comprehensive test suite showcasing modern .NET 10 testing patterns with **TUnit**, **NSubstitute**, and conversion examples to **Imposter** for HTTP mocking.
 
@@ -7,7 +7,7 @@ This directory contains a comprehensive test suite showcasing modern .NET 10 tes
 ### Test Organization (~200+ Tests)
 
 ```
-CloudPizza.Tests/
+CloudBurger.Tests/
 ├── Domain/
 │   └── OrderTests.cs (60 tests)
 │       - Order creation validation
@@ -45,7 +45,7 @@ CloudPizza.Tests/
 
 ### Run All Tests
 ```bash
-dotnet test CloudPizza.Tests.csproj
+dotnet test CloudBurger.Tests.csproj
 ```
 
 ### Run Specific Test Class
@@ -67,7 +67,7 @@ dotnet test --filter "Category=Benchmarks"
 
 ### 1. Domain Tests (OrderTests.cs)
 Tests the core business logic of Order aggregate:
-- ✅ Valid order creation with all pizza types
+- ✅ Valid order creation with all burger types
 - ✅ Business rule validation (name length, quantity limits)
 - ✅ Order ID uniqueness
 - ✅ Price calculations
@@ -77,7 +77,7 @@ Tests the core business logic of Order aggregate:
 [Test]
 public async Task Create_WithValidData_CreatesOrder()
 {
-    var order = Order.Create("John Doe", PizzaType.Margherita, 2);
+    var order = Order.Create("John Doe", BurgerType.SmashBurger, 2);
     
     await Assert.That(order.CustomerName).IsEqualTo("John Doe");
 }
@@ -95,7 +95,7 @@ Tests HTTP endpoint integration:
 public async Task CreateOrder_WithValidRequest_SavesOrder()
 {
     using var context = CreateDbContext();
-    var order = Order.Create("John Doe", PizzaType.Margherita, 2);
+    var order = Order.Create("John Doe", BurgerType.SmashBurger, 2);
     
     context.Orders.Add(order);
     await context.SaveChangesAsync();

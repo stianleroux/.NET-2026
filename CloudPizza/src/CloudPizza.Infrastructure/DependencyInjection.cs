@@ -1,8 +1,8 @@
-namespace CloudPizza.Infrastructure;
+namespace CloudBurger.Infrastructure;
 
-using CloudPizza.Infrastructure.Data;
-using CloudPizza.Infrastructure.Notifications;
-using CloudPizza.Infrastructure.Services;
+using CloudBurger.Infrastructure.Data;
+using CloudBurger.Infrastructure.Notifications;
+using CloudBurger.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,10 +25,10 @@ public static class DependencyInjection
         // Add EF Core with PostgreSQL (skip if already registered by Aspire)
         if (!skipDbContext)
         {
-            services.AddDbContext<PizzaDbContext>((serviceProvider, options) =>
+            services.AddDbContext<BurgerDbContext>((serviceProvider, options) =>
             {
-                var connectionString = configuration.GetConnectionString("pizzadb")
-                    ?? throw new InvalidOperationException("Database connection string 'pizzadb' not found");
+                var connectionString = configuration.GetConnectionString("burgerdb")
+                    ?? throw new InvalidOperationException("Database connection string 'burgerdb' not found");
 
                 options.UseNpgsql(connectionString, npgsqlOptions =>
                 {

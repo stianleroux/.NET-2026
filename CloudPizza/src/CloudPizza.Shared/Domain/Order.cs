@@ -1,6 +1,6 @@
-namespace CloudPizza.Shared.Domain;
+namespace CloudBurger.Shared.Domain;
 
-using CloudPizza.Shared.Common;
+using CloudBurger.Shared.Common;
 
 /// <summary>
 /// Order aggregate root with business logic and validation.
@@ -11,7 +11,7 @@ public sealed class Order
     // Private setters enforce encapsulation - use factory methods to create instances
     public OrderId Id { get; private set; }
     public required string CustomerName { get; init; }
-    public required PizzaType PizzaType { get; init; }
+    public required BurgerType BurgerType { get; init; }
     public required int Quantity { get; init; }
     public DateTime CreatedAtUtc { get; private set; }
     public decimal TotalPrice { get; private set; }
@@ -24,7 +24,7 @@ public sealed class Order
     /// Uses Result pattern with ValidationFailure for explicit error handling.
     /// Demonstrates: Pattern matching, functional error handling, structured validation
     /// </summary>
-    public static Result<Order> Create(string customerName, PizzaType pizzaType, int quantity)
+    public static Result<Order> Create(string customerName, BurgerType burgerType, int quantity)
     {
         // Validate customer name using pattern matching
         var nameValidation = customerName switch
@@ -54,7 +54,7 @@ public sealed class Order
                 new Dictionary<string, string[]> { ["Quantity"] = ["Quantity must be at least 1"] }),
             > 50 => Result<int>.ValidationFailure(
                 "Quantity validation failed",
-                new Dictionary<string, string[]> { ["Quantity"] = ["Cannot order more than 50 pizzas at once"] }),
+                new Dictionary<string, string[]> { ["Quantity"] = ["Cannot order more than 50 burgers at once"] }),
             _ => Result<int>.Success(quantity)
         };
 
@@ -63,18 +63,18 @@ public sealed class Order
             return Result<Order>.ValidationFailure(quantityValidation.Error, quantityValidation.ValidationErrors!);
         }
 
-        // Validate pizza type using pattern matching
-        var pizzaTypeValidation = Enum.IsDefined(pizzaType) switch
+        // Validate burger type using pattern matching
+        var burgerTypeValidation = Enum.IsDefined(burgerType) switch
         {
-            false => Result<PizzaType>.ValidationFailure(
-                "Pizza type validation failed",
-                new Dictionary<string, string[]> { ["PizzaType"] = [$"Invalid pizza type: {pizzaType}"] }),
-            true => Result<PizzaType>.Success(pizzaType)
+            false => Result<BurgerType>.ValidationFailure(
+                "Burger type validation failed",
+                new Dictionary<string, string[]> { ["BurgerType"] = [$"Invalid burger type: {burgerType}"] }),
+            true => Result<BurgerType>.Success(burgerType)
         };
 
-        if (pizzaTypeValidation.IsFailure)
+        if (burgerTypeValidation.IsFailure)
         {
-            return Result<Order>.ValidationFailure(pizzaTypeValidation.Error, pizzaTypeValidation.ValidationErrors!);
+            return Result<Order>.ValidationFailure(burgerTypeValidation.Error, burgerTypeValidation.ValidationErrors!);
         }
 
         // All validations passed - create the order
@@ -82,10 +82,10 @@ public sealed class Order
         {
             Id = OrderId.New(),
             CustomerName = nameValidation.Value,
-            PizzaType = pizzaType,
+            BurgerType = burgerType,
             Quantity = quantity,
             CreatedAtUtc = DateTime.UtcNow,
-            TotalPrice = pizzaType.GetPrice() * quantity
+            TotalPrice = burgerType.GetPrice() * quantity
         };
 
         return Result<Order>.Success(order);
@@ -94,16 +94,16 @@ public sealed class Order
     /// <summary>
     /// Reconstitute order from database (already validated).
     /// </summary>
-    public static Order Reconstitute(OrderId id, string customerName, PizzaType pizzaType, int quantity, DateTime createdAtUtc)
+    public static Order Reconstitute(OrderId id, string customerName, BurgerType burgerType, int quantity, DateTime createdAtUtc)
     {
         return new Order
         {
             Id = id,
             CustomerName = customerName,
-            PizzaType = pizzaType,
+            BurgerType = burgerType,
             Quantity = quantity,
             CreatedAtUtc = createdAtUtc,
-            TotalPrice = pizzaType.GetPrice() * quantity
+            TotalPrice = burgerType.GetPrice() * quantity
         };
     }
 }

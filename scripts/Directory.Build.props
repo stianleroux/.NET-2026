@@ -1,0 +1,6 @@
+<!-- Isolated build configuration for file-based scripts.
+     Prevents parent Directory.Build.props files from leaking
+     into these standalone .NET file-based apps.
+     See: https://learn.microsoft.com/en-us/dotnet/core/sdk/file-based-apps#be-mindful-of-implicit-files -->
+<Project>
+</Project>

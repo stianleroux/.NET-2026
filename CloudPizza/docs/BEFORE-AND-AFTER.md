@@ -16,7 +16,7 @@ This document shows side-by-side comparisons of code before and after migrating 
 ### ❌ Before: Exception-Driven
 
 ```csharp
-public static Order Create(string customerName, PizzaType pizzaType, int quantity)
+public static Order Create(string customerName, BurgerType burgerType, int quantity)
 {
     // Multiple exception points
     ArgumentException.ThrowIfNullOrWhiteSpace(customerName, nameof(customerName));
@@ -45,15 +45,15 @@ public static Order Create(string customerName, PizzaType pizzaType, int quantit
     if (quantity > 50)
     {
         throw new ArgumentException(
-            "Cannot order more than 50 pizzas at once", 
+            "Cannot order more than 50 burgers at once", 
             nameof(quantity));
     }
 
-    if (!Enum.IsDefined(pizzaType))
+    if (!Enum.IsDefined(burgerType))
     {
         throw new ArgumentException(
-            "Invalid pizza type", 
-            nameof(pizzaType));
+            "Invalid burger type", 
+            nameof(burgerType));
     }
 
     // Finally create the order
@@ -61,10 +61,10 @@ public static Order Create(string customerName, PizzaType pizzaType, int quantit
     {
         Id = OrderId.New(),
         CustomerName = customerName.Trim(),
-        PizzaType = pizzaType,
+        BurgerType = burgerType,
         Quantity = quantity,
         CreatedAtUtc = DateTime.UtcNow,
-        TotalPrice = pizzaType.GetPrice() * quantity
+        TotalPrice = burgerType.GetPrice() * quantity
     };
 }
 ```
@@ -79,7 +79,7 @@ public static Order Create(string customerName, PizzaType pizzaType, int quantit
 ### ✅ After: Result Pattern with Pattern Matching
 
 ```csharp
-public static Result<Order> Create(string customerName, PizzaType pizzaType, int quantity)
+public static Result<Order> Create(string customerName, BurgerType burgerType, int quantity)
 {
     // Validate customer name using pattern matching
     var nameValidation = customerName switch
@@ -123,7 +123,7 @@ public static Result<Order> Create(string customerName, PizzaType pizzaType, int
             "Quantity validation failed",
             new Dictionary<string, string[]> 
             { 
-                ["Quantity"] = ["Cannot order more than 50 pizzas at once"] 
+                ["Quantity"] = ["Cannot order more than 50 burgers at once"] 
             }),
         _ => Result<int>.Success(quantity)
     };
@@ -133,32 +133,32 @@ public static Result<Order> Create(string customerName, PizzaType pizzaType, int
             quantityValidation.Error, 
             quantityValidation.ValidationErrors!);
 
-    // Validate pizza type using pattern matching
-    var pizzaTypeValidation = Enum.IsDefined(pizzaType) switch
+    // Validate burger type using pattern matching
+    var burgerTypeValidation = Enum.IsDefined(burgerType) switch
     {
-        false => Result<PizzaType>.ValidationFailure(
-            "Pizza type validation failed",
+        false => Result<BurgerType>.ValidationFailure(
+            "Burger type validation failed",
             new Dictionary<string, string[]> 
             { 
-                ["PizzaType"] = [$"Invalid pizza type: {pizzaType}"] 
+                ["BurgerType"] = [$"Invalid burger type: {burgerType}"] 
             }),
-        true => Result<PizzaType>.Success(pizzaType)
+        true => Result<BurgerType>.Success(burgerType)
     };
 
-    if (pizzaTypeValidation.IsFailure)
+    if (burgerTypeValidation.IsFailure)
         return Result<Order>.ValidationFailure(
-            pizzaTypeValidation.Error, 
-            pizzaTypeValidation.ValidationErrors!);
+            burgerTypeValidation.Error, 
+            burgerTypeValidation.ValidationErrors!);
 
     // All validations passed - create the order
     return Result<Order>.Success(new Order
     {
         Id = OrderId.New(),
         CustomerName = nameValidation.Value,
-        PizzaType = pizzaType,
+        BurgerType = burgerType,
         Quantity = quantity,
         CreatedAtUtc = DateTime.UtcNow,
-        TotalPrice = pizzaType.GetPrice() * quantity
+        TotalPrice = burgerType.GetPrice() * quantity
     });
 }
 ```
@@ -401,17 +401,17 @@ public static Result<byte[]> GenerateQrCode(string url, int pixelsPerModule = 20
 ```csharp
 private static async Task<IResult> CreateOrderAsync(
     CreateOrderRequest request,
-    PizzaDbContext dbContext)
+    BurgerDbContext dbContext)
 {
     try
     {
         // Parse can throw
-        var pizzaType = Enum.Parse<PizzaType>(request.PizzaType);
+        var burgerType = Enum.Parse<BurgerType>(request.BurgerType);
         
         // Create can throw multiple ArgumentExceptions
         var order = Order.Create(
             request.CustomerName, 
-            pizzaType, 
+            burgerType, 
             request.Quantity);
 
         dbContext.Orders.Add(order);
@@ -442,20 +442,20 @@ private static async Task<IResult> CreateOrderAsync(
 private static async Task<Results<Created<CreateOrderResponse>, ValidationProblem>> 
     CreateOrderAsync(
         CreateOrderRequest request,
-        PizzaDbContext dbContext,
+        BurgerDbContext dbContext,
         CancellationToken cancellationToken)
 {
-    // Parse pizza type
-    if (!Enum.TryParse<PizzaType>(request.PizzaType, ignoreCase: true, out var pizzaType))
+    // Parse burger type
+    if (!Enum.TryParse<BurgerType>(request.BurgerType, ignoreCase: true, out var burgerType))
     {
         return TypedResults.ValidationProblem(new Dictionary<string, string[]>
         {
-            ["PizzaType"] = [$"Invalid pizza type. Valid: {string.Join(", ", Enum.GetNames<PizzaType>())}"]
+            ["BurgerType"] = [$"Invalid burger type. Valid: {string.Join(", ", Enum.GetNames<BurgerType>())}"]
         });
     }
 
     // Create domain entity using Result pattern
-    var orderResult = Order.Create(request.CustomerName, pizzaType, request.Quantity);
+    var orderResult = Order.Create(request.CustomerName, burgerType, request.Quantity);
 
     // Handle validation failures explicitly
     if (orderResult.IsFailure)
@@ -477,7 +477,7 @@ private static async Task<Results<Created<CreateOrderResponse>, ValidationProble
     {
         OrderId = order.Id.ToString(),
         CustomerName = order.CustomerName,
-        PizzaType = order.PizzaType.GetDisplayName(),
+        BurgerType = order.BurgerType.GetDisplayName(),
         Quantity = order.Quantity,
         TotalPrice = order.TotalPrice,
         CreatedAtUtc = order.CreatedAtUtc
@@ -548,7 +548,7 @@ private static async Task<Results<Created<CreateOrderResponse>, ValidationProble
 // Service
 try
 {
-    var order = Order.Create(name, pizza, quantity);
+    var order = Order.Create(name, burger, quantity);
     return order;
 }
 catch (ArgumentException ex)
@@ -574,7 +574,7 @@ catch (ArgumentException ex)
 
 ```csharp
 // Service
-var result = Order.Create(name, pizza, quantity);
+var result = Order.Create(name, burger, quantity);
 if (result.IsFailure)
 {
     logger.LogWarning("Order validation failed: {Error}", result.Error);
